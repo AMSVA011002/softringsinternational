@@ -49,10 +49,20 @@ jobs:
           ls -la _site
           echo "Static build verified."
 
+      - name: Check whether GitHub Pages is enabled
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          if gh api "repos/${GITHUB_REPOSITORY}/pages" >/dev/null 2>&1; then
+            echo "GitHub Pages site detected."
+          else
+            echo "::error title=GitHub Pages is not enabled::A repository admin must enable Pages once at https://github.com/${GITHUB_REPOSITORY}/settings/pages (Build and deployment -> Source: GitHub Actions). Creating the Pages site needs admin rights, which the workflow token cannot hold. After enabling it, re-run this workflow."
+            exit 1
+          fi
+
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
-        with:
-          enablement: true
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
