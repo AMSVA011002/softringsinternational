@@ -51,10 +51,16 @@ The repository includes a ready-to-run **GitHub Pages** pipeline that publishes 
 ### How it works
 1. `build-pages.php` renders every PHP page through an isolated PHP CLI process and rewrites all internal routes (`*.php` → `*.html`) into a static build inside `_site/`.
 2. `.github/workflows/pages.yml` compiles that static build on **Ubuntu + PHP 8.3**, verifies the output, uploads the Pages artifact, and deploys it with `actions/deploy-pages`.
-3. The workflow enables GitHub Pages (`actions/configure-pages` with `enablement: true`) and publishes to `https://<owner>.github.io/<repository>/`.
+3. The workflow checks that Pages is enabled, configures Pages, and publishes to `https://<owner>.github.io/<repository>/`.
 
-### One-time setup (only if Pages is disabled)
-If the deploy job reports that Pages is not enabled, open **Settings → Pages** in the GitHub repository and set **Source** to **GitHub Actions**, then re-run the workflow. No build commands or secrets are required.
+### One-time setup (required before the first deploy)
+GitHub does **not** allow an Actions workflow token (`GITHUB_TOKEN`) to create a Pages site — site creation is a repository-administration action. A repository admin must therefore enable Pages **once**:
+
+1. Open **Settings → Pages** in the GitHub repository.
+2. Under **Build and deployment**, set **Source** to **GitHub Actions**.
+3. Re-run the **Deploy static site to GitHub Pages** workflow (or push to `main`).
+
+After that one-time step, every push to `main` builds and deploys automatically with no further setup and no stored secrets.
 
 ### Build locally
 ```bash
