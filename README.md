@@ -1,5 +1,7 @@
 # Softrings International (Pvt) Ltd — Corporate Profile Website
 
+**Live site (GitHub Pages):** https://amsva011002.github.io/softringsinternational/
+
 Official corporate profile web application for **Softrings International (Pvt) Ltd** (Member of the **Softrings Group of Companies**, Sri Lanka), built with **PHP 8+**, semantic **HTML5**, bespoke **CSS3**, and zero-dependency **Vanilla JavaScript**.
 
 ## Key Features
