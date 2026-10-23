@@ -1,0 +1,12 @@
+# Runtime databases and logs
+storage/*.sqlite
+storage/*.sqlite-journal
+storage/*.sqlite-wal
+storage/*.sqlite-shm
+storage/*.json
+*.log
+
+# Dependencies & OS metadata
+node_modules/
+.DS_Store
+Thumbs.db
