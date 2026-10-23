@@ -19,6 +19,7 @@ Official corporate profile web application for **Softrings International (Pvt) L
 ├── branches.php            # Interactive Sri Lanka map & branch directory
 ├── careers.php             # "The Human Factor" careers & HR application portal
 ├── contact.php             # Corporate, wholesale & sub-dealer inquiry desk
+├── 404.php                 # Branded "page not found" route (exported as 404.html)
 ├── api.php                 # JSON API for inquiries, HR applications & reference lookup
 ├── build-pages.php         # Static compiler for GitHub Pages (renders PHP -> HTML)
 ├── router.php              # Built-in PHP server router protecting /includes & /storage
@@ -50,7 +51,7 @@ The repository includes a ready-to-run **GitHub Pages** pipeline that publishes 
 
 ### How it works
 1. `build-pages.php` renders every PHP page through an isolated PHP CLI process and rewrites all internal routes (`*.php` → `*.html`) into a static build inside `_site/`.
-2. `.github/workflows/pages.yml` compiles that static build on **Ubuntu + PHP 8.3**, verifies the output, uploads the Pages artifact, and deploys it with `actions/deploy-pages`.
+2. `.github/workflows/pages.yml` compiles that static build on **Ubuntu + PHP 8.3**, verifies the output (pages, assets, branded `404.html`, `sitemap.xml`, `robots.txt`), uploads the Pages artifact, and deploys it with `actions/deploy-pages`.
 3. The workflow checks that Pages is enabled, configures Pages, and publishes to `https://<owner>.github.io/<repository>/`.
 
 ### One-time setup (required before the first deploy)
