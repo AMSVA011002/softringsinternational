@@ -8,10 +8,17 @@ $activeNav = $activeNav ?? 'home';
 
 $branchesAll = get_branches();
 $openCount = 0;
+$scheduleCompact = [];
 foreach ($branchesAll as $b) {
     if (get_branch_live_status($b)['is_open']) {
         $openCount++;
     }
+    $scheduleCompact[] = [
+        'id' => $b['id'],
+        'mf' => $b['hours_mf'],
+        'sat' => $b['hours_sat'],
+        'sun' => $b['hours_sun'],
+    ];
 }
 $trilingual = get_trilingual_motto();
 $colomboNowIso = date('c');
@@ -74,12 +81,12 @@ $colomboTimeFormatted = date('h:i A');
   <div class="utility-bar" role="region" aria-label="Corporate status and language">
     <div class="container utility-bar__inner">
       <div class="utility-bar__left">
-        <span class="live-indicator <?= $openCount > 0 ? 'is-open' : 'is-standby' ?>">
+        <span class="live-indicator <?= $openCount > 0 ? 'is-open' : 'is-standby' ?>" id="live-indicator-badge">
           <span class="live-indicator__dot" aria-hidden="true"></span>
           <span id="slst-clock" data-server-iso="<?= e($colomboNowIso) ?>">Colombo <?= e($colomboTimeFormatted) ?> SLST</span>
         </span>
         <span class="utility-sep" aria-hidden="true">·</span>
-        <span class="utility-status">
+        <span class="utility-status" id="utility-open-summary" data-schedules="<?= e((string) json_encode($scheduleCompact)) ?>">
           <?php if ($openCount > 0): ?>
             <strong><?= $openCount ?> of <?= count($branchesAll) ?></strong> Regional Hubs Open Now
           <?php else: ?>

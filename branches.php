@@ -42,7 +42,7 @@ require_once __DIR__ . '/includes/header.php';
         </div>
         <div class="dossier-meta-row">
           <span>Current Local Time</span>
-          <strong><?= e(date('l, h:i A')) ?></strong>
+          <strong id="branches-local-time"><?= e(date('l, h:i A')) ?></strong>
         </div>
       </div>
     </div>
@@ -150,7 +150,7 @@ require_once __DIR__ . '/includes/header.php';
                 <span class="branch-card__badge"><?= e($b['type']) ?> · <?= e($b['province']) ?> Province</span>
                 <h2><?= e($b['name']) ?></h2>
               </div>
-              <span class="status-pill <?= $st['is_open'] ? 'is-open' : 'is-closed' ?>">
+              <span class="status-pill <?= $st['is_open'] ? 'is-open' : 'is-closed' ?>" data-full-status="<?= e($b['id']) ?>">
                 <?= e($st['label']) ?>
               </span>
             </div>

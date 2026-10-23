@@ -229,7 +229,7 @@ require_once __DIR__ . '/includes/header.php';
           <a href="branches.php#<?= e($b['id']) ?>" class="mini-branch-card">
             <div class="mini-branch-card__top">
               <strong><?= e($b['city']) ?></strong>
-              <span class="status-pill <?= $st['is_open'] ? 'is-open' : 'is-closed' ?>">
+              <span class="status-pill <?= $st['is_open'] ? 'is-open' : 'is-closed' ?>" data-mini-status="<?= e($b['id']) ?>">
                 <?= $st['is_open'] ? 'Open' : 'Closed' ?>
               </span>
             </div>
