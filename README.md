@@ -20,7 +20,12 @@ Official corporate profile web application for **Softrings International (Pvt) L
 ├── careers.php             # "The Human Factor" careers & HR application portal
 ├── contact.php             # Corporate, wholesale & sub-dealer inquiry desk
 ├── api.php                 # JSON API for inquiries, HR applications & reference lookup
+├── build-pages.php         # Static compiler for GitHub Pages (renders PHP -> HTML)
 ├── router.php              # Built-in PHP server router protecting /includes & /storage
+├── scripts/
+│   └── render-page.php     # Isolated CLI page renderer used by the static compiler
+├── .github/workflows/
+│   └── pages.yml           # GitHub Pages build & deploy workflow
 ├── includes/
 │   ├── config.php          # Central corporate data, SLST branch status & CSRF helpers
 │   ├── db.php              # Self-initializing SQLite3 + JSON fallback storage layer
@@ -39,3 +44,30 @@ Start with PHP's built-in web server from the repository root:
 php -S 0.0.0.0:8080 router.php
 ```
 Or deploy directly to Apache (`.htaccess` included) or Nginx + PHP-FPM (`PHP 8.0+`).
+
+## Publishing with GitHub Pages (Live Static Deployment)
+The repository includes a ready-to-run **GitHub Pages** pipeline that publishes the public website automatically on every push to `main`.
+
+### How it works
+1. `build-pages.php` renders every PHP page through an isolated PHP CLI process and rewrites all internal routes (`*.php` → `*.html`) into a static build inside `_site/`.
+2. `.github/workflows/pages.yml` compiles that static build on **Ubuntu + PHP 8.3**, verifies the output, uploads the Pages artifact, and deploys it with `actions/deploy-pages`.
+3. The workflow enables GitHub Pages (`actions/configure-pages` with `enablement: true`) and publishes to `https://<owner>.github.io/<repository>/`.
+
+### One-time setup (only if Pages is disabled)
+If the deploy job reports that Pages is not enabled, open **Settings → Pages** in the GitHub repository and set **Source** to **GitHub Actions**, then re-run the workflow. No build commands or secrets are required.
+
+### Build locally
+```bash
+php build-pages.php                # static build into ./_site
+php build-pages.php docs           # custom output directory
+python3 -m http.server 8099 -d _site   # preview the static build
+```
+
+### Static vs. PHP hosting
+| Capability | PHP hosting (Apache/Nginx/PHP-FPM) | GitHub Pages (static) |
+| --- | --- | --- |
+| All pages, styling, map, calculator, trilingual switcher | ✅ | ✅ |
+| Inquiry & HR forms | ✅ CSRF-validated, saved to SQLite3/JSON | ✅ Recorded in the browser ledger with a reference code + pre-filled email hand-off |
+| Server-side reference lookup (`SFT-…` / `HR-SFT-…`) | ✅ Across all visitors | ✅ For references created in the same browser |
+
+> GitHub Pages cannot execute PHP or write to SQLite, so the static build gracefully degrades the form/API layer to a client-side ledger plus a `mailto:` hand-off to `international@softrings.lk` / `hr@softrings.lk`. Deploy the PHP build to any standard PHP host for the full server-side desk.

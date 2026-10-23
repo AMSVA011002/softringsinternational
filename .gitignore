@@ -10,3 +10,6 @@ storage/*.json
 node_modules/
 .DS_Store
 Thumbs.db
+
+# GitHub Pages static build output
+_site/
