@@ -37,14 +37,16 @@ jobs:
         run: |
           set -euo pipefail
           for page in index about services branches careers contact; do
-            test -s "_site/${page}.html"
+            test -s "_site/${page}.html" || { echo "Missing ${page}.html"; exit 1; }
           done
-          test -s "_site/.nojekyll"
-          test -s "_site/404.html"
-          test -d "_site/assets/css"
-          test -d "_site/assets/js"
-          test -d "_site/assets/images"
-          grep -q 'Softrings' _site/index.html
+          test -f "_site/.nojekyll" || { echo "Missing .nojekyll"; exit 1; }
+          test -s "_site/404.html" || { echo "Missing 404.html"; exit 1; }
+          test -f "_site/assets/css/style.css" || { echo "Missing stylesheet"; exit 1; }
+          test -f "_site/assets/js/main.js" || { echo "Missing client script"; exit 1; }
+          test -f "_site/assets/images/hero-corporate.jpg" || { echo "Missing hero image"; exit 1; }
+          grep -q 'Softrings' _site/index.html || { echo "Corporate content missing"; exit 1; }
+          if grep -q '<?php' _site/*.html; then echo "PHP code leaked into static build"; exit 1; fi
+          ls -la _site
           echo "Static build verified."
 
       - name: Configure GitHub Pages
