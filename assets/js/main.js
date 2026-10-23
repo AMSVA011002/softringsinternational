@@ -8,6 +8,15 @@
 
   const STATIC_LEDGER_KEY = 'softrings_ledger_v1';
 
+  /**
+   * GitHub Pages (or any host without PHP) cannot execute api.php, so requests
+   * would only return a 404 document. Detect static hosting up front and use the
+   * browser ledger directly instead of logging noisy failed network calls.
+   */
+  const HAS_PHP_BACKEND = !/(^|\.)github\.io$/i.test(window.location.hostname)
+    && !/\.html?$/i.test(window.location.pathname.split('/').pop() || '');
+  const IS_STATIC_HOST = !HAS_PHP_BACKEND;
+
   const escapeHtml = (str) => {
     const div = document.createElement('div');
     div.textContent = String(str ?? '');
@@ -330,25 +339,29 @@
       if (!ref) return;
       trackerResult.innerHTML = '<div class="alert">Checking Softrings Corporate Desk ledger...</div>';
 
-      try {
-        const res = await fetch(`api.php?action=ticket&ref=${encodeURIComponent(ref)}`);
-        const text = await res.text();
-        if (!text.trim().startsWith('<?php')) {
-          const data = JSON.parse(text);
-          if (res.ok && data && data.ok && data.record) {
-            trackerResult.innerHTML = renderRecordAlert(data.record);
-            return;
+      if (!IS_STATIC_HOST) {
+        try {
+          const res = await fetch(`api.php?action=ticket&ref=${encodeURIComponent(ref)}`);
+          const text = await res.text();
+          if (!text.trim().startsWith('<?php')) {
+            const data = JSON.parse(text);
+            if (res.ok && data && data.ok && data.record) {
+              trackerResult.innerHTML = renderRecordAlert(data.record);
+              return;
+            }
+            if (res.ok) {
+              const localRec = readLocalLedger()[ref];
+              if (localRec) {
+                trackerResult.innerHTML = renderRecordAlert(localRec);
+                return;
+              }
+              trackerResult.innerHTML = `<div class="alert alert--error"><p>${escapeHtml((data && data.error) || 'Reference not found.')}</p></div>`;
+              return;
+            }
           }
-          const localRec = readLocalLedger()[ref];
-          if (localRec) {
-            trackerResult.innerHTML = renderRecordAlert(localRec);
-            return;
-          }
-          trackerResult.innerHTML = `<div class="alert alert--error"><p>${escapeHtml((data && data.error) || 'Reference not found.')}</p></div>`;
-          return;
+        } catch (_) {
+          // Fall through to client static ledger
         }
-      } catch (_) {
-        // Fall through to client static ledger
       }
 
       const localRec = readLocalLedger()[ref];
@@ -552,30 +565,32 @@
       }
 
       try {
-        const res = await fetch(endpoint, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload),
-        });
-        const text = await res.text();
-        if (!text.trim().startsWith('<?php')) {
-          const data = JSON.parse(text);
-          if (res.ok && data && data.ok) {
-            writeLocalLedger(data.ref_code, {
-              record_kind: isCareer ? 'Career Application' : 'Corporate / Dealer Inquiry',
-              ref_code: data.ref_code,
-              full_name: payload.full_name,
-              subject: isCareer ? payload.job_title : payload.inquiry_type,
-              status: data.status,
-              created_at: data.created_at,
-            });
-            renderSuccessBanner(feedback, data, '');
-            form.reset();
-            return;
-          }
-          if (res.status >= 400 && res.status !== 404 && res.status !== 405 && data && data.error) {
-            feedback.innerHTML = `<div class="alert alert--error" role="alert"><p>${escapeHtml(data.error)}</p></div>`;
-            return;
+        if (!IS_STATIC_HOST) {
+          const res = await fetch(endpoint, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+          });
+          const text = await res.text();
+          if (!text.trim().startsWith('<?php')) {
+            const data = JSON.parse(text);
+            if (res.ok && data && data.ok) {
+              writeLocalLedger(data.ref_code, {
+                record_kind: isCareer ? 'Career Application' : 'Corporate / Dealer Inquiry',
+                ref_code: data.ref_code,
+                full_name: payload.full_name,
+                subject: isCareer ? payload.job_title : payload.inquiry_type,
+                status: data.status,
+                created_at: data.created_at,
+              });
+              renderSuccessBanner(feedback, data, '');
+              form.reset();
+              return;
+            }
+            if (res.status >= 400 && res.status !== 404 && res.status !== 405 && data && data.error) {
+              feedback.innerHTML = `<div class="alert alert--error" role="alert"><p>${escapeHtml(data.error)}</p></div>`;
+              return;
+            }
           }
         }
       } catch (_) {
