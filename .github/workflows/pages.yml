@@ -44,6 +44,9 @@ jobs:
           test -f "_site/assets/css/style.css" || { echo "Missing stylesheet"; exit 1; }
           test -f "_site/assets/js/main.js" || { echo "Missing client script"; exit 1; }
           test -f "_site/assets/images/hero-corporate.jpg" || { echo "Missing hero image"; exit 1; }
+          test -s "_site/sitemap.xml" || { echo "Missing sitemap.xml"; exit 1; }
+          test -s "_site/robots.txt" || { echo "Missing robots.txt"; exit 1; }
+          grep -q 'Error 404' _site/404.html || { echo "404 page is not the branded error page"; exit 1; }
           grep -q 'Softrings' _site/index.html || { echo "Corporate content missing"; exit 1; }
           if grep -q '<?php' _site/*.html; then echo "PHP code leaked into static build"; exit 1; fi
           ls -la _site

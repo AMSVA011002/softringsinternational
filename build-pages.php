@@ -162,11 +162,57 @@ foreach ($pages as $source => $target) {
 // GitHub Pages: skip Jekyll processing so asset filenames are served verbatim.
 file_put_contents($outDir . '/.nojekyll', '');
 
-// Branded 404 handler for GitHub Pages.
-if (isset($built['index.html'])) {
-    copy($outDir . '/index.html', $outDir . '/404.html');
-    fwrite(STDOUT, "Generated 404.html\n");
+// Branded 404 handler for GitHub Pages (rendered from the real 404.php page).
+if (is_file($rootDir . '/404.php')) {
+    try {
+        $notFoundHtml = rewrite_php_links(render_page($phpBinary, $rootDir, '404.php'));
+        file_put_contents($outDir . '/404.html', $notFoundHtml);
+        fwrite(STDOUT, "Generated branded 404.html (" . number_format(strlen($notFoundHtml)) . " bytes)\n");
+    } catch (Throwable $e) {
+        fwrite(STDERR, 'WARNING: 404 page render failed: ' . $e->getMessage() . "\n");
+        copy($outDir . '/index.html', $outDir . '/404.html');
+    }
 }
+
+// Search engine discovery files (robots.txt + sitemap.xml)
+$baseUrl = rtrim((string) (getenv('SITE_BASE_URL') ?: ''), '/');
+if ($baseUrl === '') {
+    $repoSlug = (string) (getenv('GITHUB_REPOSITORY') ?: 'AMSVA011002/softringsinternational');
+    [$repoOwner, $repoName] = array_pad(explode('/', $repoSlug, 2), 2, 'softringsinternational');
+    $baseUrl = 'https://' . strtolower($repoOwner) . '.github.io/' . $repoName;
+}
+
+$staticRoutes = [
+    '' => '1.0',
+    'about.html' => '0.9',
+    'services.html' => '0.9',
+    'branches.html' => '0.8',
+    'careers.html' => '0.7',
+    'contact.html' => '0.8',
+];
+
+$sitemapXml = '<?xml version="1.0" encoding="UTF-8"?>' . "\n"
+    . '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' . "\n";
+$today = gmdate('Y-m-d');
+foreach ($staticRoutes as $route => $priority) {
+    $loc = $route === '' ? $baseUrl . '/' : $baseUrl . '/' . $route;
+    $sitemapXml .= "  <url>\n"
+        . "    <loc>{$loc}</loc>\n"
+        . "    <lastmod>{$today}</lastmod>\n"
+        . "    <changefreq>monthly</changefreq>\n"
+        . "    <priority>{$priority}</priority>\n"
+        . "  </url>\n";
+}
+$sitemapXml .= '</urlset>' . "\n";
+
+file_put_contents($outDir . '/sitemap.xml', $sitemapXml);
+
+$robotsTxt = "User-agent: *\n"
+    . "Allow: /\n\n"
+    . "Sitemap: {$baseUrl}/sitemap.xml\n";
+file_put_contents($outDir . '/robots.txt', $robotsTxt);
+
+fwrite(STDOUT, "Generated sitemap.xml and robots.txt for {$baseUrl}\n");
 
 // Copy static assets when compiling outside the repository root.
 if (realpath($outDir) !== realpath($rootDir)) {
