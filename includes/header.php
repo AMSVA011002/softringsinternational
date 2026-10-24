@@ -35,8 +35,9 @@ $colomboTimeFormatted = date('h:i A');
   <link rel="icon" type="image/svg+xml" href="assets/images/favicon.svg">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Lora:ital,wght@0,400;0,500;1,400;1,500&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="assets/css/style.css">
+  <link rel="stylesheet" href="assets/css/atrium.css">
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -161,14 +162,14 @@ $colomboTimeFormatted = date('h:i A');
 
       <nav class="primary-nav" id="primary-nav" aria-label="Primary">
         <ul class="primary-nav__list">
-          <li><a href="index.php" class="nav-link <?= $activeNav === 'home' ? 'is-active' : '' ?>">Overview</a></li>
-          <li><a href="about.php" class="nav-link <?= $activeNav === 'about' ? 'is-active' : '' ?>">Corporate Profile</a></li>
-          <li><a href="services.php" class="nav-link <?= $activeNav === 'services' ? 'is-active' : '' ?>">Divisions &amp; mPOS</a></li>
-          <li><a href="branches.php" class="nav-link <?= $activeNav === 'branches' ? 'is-active' : '' ?>">Branch Network</a></li>
+          <li><a href="index.php" class="nav-link <?= $activeNav === 'home' ? 'is-active' : '' ?>">Home</a></li>
+          <li><a href="about.php" class="nav-link <?= $activeNav === 'about' ? 'is-active' : '' ?>">About</a></li>
+          <li><a href="services.php" class="nav-link <?= $activeNav === 'services' ? 'is-active' : '' ?>">Divisions</a></li>
+          <li><a href="branches.php" class="nav-link <?= $activeNav === 'branches' ? 'is-active' : '' ?>">Network</a></li>
           <li><a href="careers.php" class="nav-link <?= $activeNav === 'careers' ? 'is-active' : '' ?>">Careers</a></li>
         </ul>
         <div class="primary-nav__cta">
-          <a href="contact.php" class="btn btn--primary btn--sm <?= $activeNav === 'contact' ? 'is-current' : '' ?>">Partner &amp; Contact</a>
+          <a href="contact.php" class="btn btn--primary btn--sm <?= $activeNav === 'contact' ? 'is-current' : '' ?>">Contact Us</a>
         </div>
       </nav>
     </div>

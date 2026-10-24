@@ -159,10 +159,10 @@ require_once __DIR__ . '/includes/header.php';
 <!-- Brand & Service Matrix -->
 <section class="section section--white">
   <div class="container">
-    <div class="section-header-narrow">
-      <span class="eyebrow">Authorized Product Matrix</span>
-      <h2 class="section-title">What You Can Access at Every Softrings Center</h2>
-    </div>
+    <header class="atr-head">
+      <span class="atr-kicker">Authorized Product Matrix</span>
+      <h2 class="atr-heading">What You Can Access at Every Softrings Center</h2>
+    </header>
 
     <div class="matrix-grid">
       <div class="matrix-box">
