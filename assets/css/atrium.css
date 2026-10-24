@@ -3406,31 +3406,74 @@ p {
 
 /* --------------------------------------------------------------------------
    18. Floating scroll-to-top control
+   Circular action button with a conic-gradient reading-progress ring.
+   The ring is pure CSS (no SVG letterboxing), so it stays perfectly round at
+   every viewport size and cannot drift away from the button face.
    -------------------------------------------------------------------------- */
 
 .scroll-top {
+  --scroll-progress: 0;
   position: fixed;
   right: 22px;
-  bottom: 22px;
+  bottom: calc(22px + env(safe-area-inset-bottom, 0px));
   z-index: 300;
   display: inline-flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 1px;
-  width: 52px;
-  height: 52px;
+  width: 54px;
+  height: 54px;
   padding: 0;
-  border: 1px solid var(--atr-navy);
-  border-radius: 2px;
-  background: var(--atr-navy);
+  border: 0;
+  border-radius: 50%;
+  background-color: #002e87;
+  background-image: conic-gradient(
+    var(--atr-accent) calc(var(--scroll-progress) * 1turn),
+    rgba(255, 255, 255, 0.26) 0
+  );
   color: #fff;
   cursor: pointer;
-  box-shadow: 0 12px 26px rgba(0, 19, 48, 0.28);
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  touch-action: manipulation;
+  box-shadow: 0 10px 24px rgba(0, 19, 48, 0.3);
+  isolation: isolate;
   opacity: 0;
   transform: translateY(14px) scale(0.94);
   transition: opacity 0.24s var(--atr-ease), transform 0.24s var(--atr-ease),
-    background-color 0.2s var(--atr-ease), border-color 0.2s var(--atr-ease), color 0.2s var(--atr-ease);
+    box-shadow 0.2s var(--atr-ease);
+}
+
+/* Inner disc leaves only a 4px progress ring visible around the edge */
+.scroll-top__disc {
+  position: absolute;
+  inset: 4px;
+  z-index: 0;
+  border-radius: 50%;
+  background: var(--atr-navy);
+  transition: background-color 0.2s var(--atr-ease);
+}
+
+.scroll-top__icon,
+.scroll-top__label {
+  position: relative;
+  z-index: 1;
+}
+
+.scroll-top__icon {
+  width: 20px;
+  height: 20px;
+  transition: transform 0.2s var(--atr-ease);
+}
+
+.scroll-top__label {
+  font-family: var(--font-mono);
+  font-size: 0.5rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  line-height: 1;
 }
 
 .scroll-top[hidden] {
@@ -3442,81 +3485,61 @@ p {
   transform: translateY(0) scale(1);
 }
 
-.scroll-top:hover,
+/* Hover affordance only where a real hover exists: on touch screens Android
+   keeps :hover after a tap, which previously left the control stuck in its
+   green state. */
+@media (hover: hover) and (pointer: fine) {
+  .scroll-top:hover {
+    box-shadow: 0 14px 30px rgba(0, 19, 48, 0.36);
+    transform: translateY(-2px) scale(1.02);
+  }
+
+  .scroll-top:hover .scroll-top__disc {
+    background: var(--atr-accent-dark);
+  }
+
+  .scroll-top:hover .scroll-top__icon {
+    transform: translateY(-2px);
+  }
+}
+
 .scroll-top:focus-visible {
-  background: var(--atr-accent);
-  border-color: var(--atr-accent);
-  color: var(--atr-accent-ink);
-  transform: translateY(-2px) scale(1);
+  outline: 3px solid var(--atr-accent);
+  outline-offset: 3px;
 }
 
 .scroll-top:active {
-  transform: translateY(0) scale(0.97);
+  transform: translateY(0) scale(0.96);
+  box-shadow: 0 6px 14px rgba(0, 19, 48, 0.32);
 }
 
-.scroll-top svg:first-child {
-  width: 19px;
-  height: 19px;
-  transition: transform 0.2s var(--atr-ease);
-}
-
-.scroll-top:hover svg:first-child,
-.scroll-top:focus-visible svg:first-child {
-  transform: translateY(-2px);
-}
-
-.scroll-top__label {
-  font-family: var(--font-mono);
-  font-size: 0.52rem;
-  font-weight: 700;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  line-height: 1;
-}
-
-/* Circular reading-progress ring drawn around the button */
-.scroll-top__ring {
-  position: absolute;
-  inset: -5px;
-  width: calc(100% + 10px);
-  height: calc(100% + 10px);
-  transform: rotate(-90deg);
-  pointer-events: none;
-}
-
-.scroll-top__ring-track,
-.scroll-top__ring-progress {
-  fill: none;
-  stroke-width: 2;
-}
-
-.scroll-top__ring-track {
-  stroke: rgba(0, 19, 48, 0.14);
-}
-
-.scroll-top__ring-progress {
-  stroke: var(--atr-accent);
-  stroke-linecap: round;
-  stroke-dasharray: 125.66;
-  stroke-dashoffset: 125.66;
-  transition: stroke-dashoffset 0.12s linear, stroke 0.2s var(--atr-ease);
-}
-
-.scroll-top:hover .scroll-top__ring-progress,
-.scroll-top:focus-visible .scroll-top__ring-progress {
-  stroke: var(--atr-navy);
+.scroll-top:active .scroll-top__disc {
+  background: var(--atr-accent-dark);
 }
 
 @media (max-width: 760px) {
   .scroll-top {
     right: 14px;
-    bottom: 14px;
-    width: 46px;
-    height: 46px;
+    bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+    width: 50px;
+    height: 50px;
   }
 
   .scroll-top__label {
     display: none;
+  }
+
+  .scroll-top__icon {
+    width: 21px;
+    height: 21px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scroll-top,
+  .scroll-top__disc,
+  .scroll-top__icon {
+    transition: none !important;
   }
 }
 

@@ -919,8 +919,6 @@
   /* 8. Floating Scroll-to-Top Control with Reading Progress */
   const scrollTopBtn = document.getElementById('scroll-top');
   if (scrollTopBtn) {
-    const progressRing = scrollTopBtn.querySelector('[data-scroll-progress]');
-    const RING_LENGTH = 125.66; // 2πr for r = 20
     const SHOW_AFTER = 420;
     let queued = false;
 
@@ -943,9 +941,9 @@
         }
       }
 
-      if (progressRing) {
-        progressRing.style.strokeDashoffset = String(RING_LENGTH * (1 - ratio));
-      }
+      // Drives the conic-gradient ring around the button face.
+      scrollTopBtn.style.setProperty('--scroll-progress', ratio.toFixed(4));
+      scrollTopBtn.setAttribute('aria-label', `Scroll back to the top of the page (${Math.round(ratio * 100)}% read)`);
     };
 
     const onScroll = () => {
@@ -958,6 +956,12 @@
       const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
       window.scrollTo({ top: 0, behavior: reduce ? 'auto' : 'smooth' });
       scrollTopBtn.blur();
+    });
+
+    // Touch browsers can keep :active/:hover latched after a tap; drop the
+    // visual state explicitly so the control never stays in a pressed colour.
+    ['touchend', 'touchcancel'].forEach((evt) => {
+      scrollTopBtn.addEventListener(evt, () => scrollTopBtn.blur(), { passive: true });
     });
 
     window.addEventListener('scroll', onScroll, { passive: true });
