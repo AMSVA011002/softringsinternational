@@ -11,6 +11,35 @@ $branches = get_branches();
 $extended = get_extended_touchpoints();
 $districts = get_sri_lanka_districts();
 
+// Every office, showroom and group store, ordered office → showroom → store so
+// the map numbers match the printed key beside it.
+$mapLocations = get_map_locations();
+$categoryOrder = ['office' => 0, 'showroom' => 1, 'store' => 2];
+usort($mapLocations, static fn (array $a, array $b): int => $categoryOrder[$a['category']] <=> $categoryOrder[$b['category']]);
+$mapPins = layout_map_pins($mapLocations);
+$mapById = [];
+foreach ($mapPins as $pin) {
+    $mapById[$pin['id']] = $pin;
+}
+$mapCounts = ['office' => 0, 'showroom' => 0, 'store' => 0];
+foreach ($mapPins as $pin) {
+    $mapCounts[$pin['category']]++;
+}
+$keyLabels = [
+    'office' => 'Corporate Office',
+    'showroom' => 'Showroom',
+    'store' => 'Group Store',
+];
+$detailPins = layout_detail_pins($mapPins);
+$corridorPoints = [];
+foreach (['pettah-store', 'nugegoda-tech', 'maharagama-hq', 'homagama-flagship', 'athurugiriya-store', 'avissawella-branch'] as $corridorId) {
+    foreach ($detailPins as $dp) {
+        if ($dp['id'] === $corridorId) {
+            $corridorPoints[] = sprintf('%.1f,%.1f', $dp['dx'], $dp['dy']);
+        }
+    }
+}
+
 // Provinces where Softrings operates, and the districts that hold a branch —
 // both are used to tint the map so the network reads at a glance.
 $activeProvinces = ['Western', 'Central'];
@@ -75,7 +104,7 @@ require_once __DIR__ . '/includes/header.php';
         <input
           type="search"
           id="branch-search-input"
-          placeholder="Search city, road, or service (e.g. Gampola, mCash, Repair)..."
+          placeholder="Search city, road or service..."
           aria-label="Search branches"
         >
         <label class="open-now-toggle">
@@ -85,12 +114,12 @@ require_once __DIR__ . '/includes/header.php';
       </div>
     </div>
 
-    <div class="branch-explorer">
-      <!-- Interactive Sri Lanka District Map -->
-      <aside class="srilanka-map-panel" aria-label="Sri Lanka Branch Network Map">
+    <!-- Full network map: every office, showroom and group store -->
+    <div class="network-map">
+      <div class="srilanka-map-panel" id="network-map" data-map-root>
         <div class="srilanka-map-panel__head">
           <strong>Sri Lanka Operational Map</strong>
-          <span>Click a node to inspect hub</span>
+          <span>Hover or tap a marker</span>
         </div>
         <div class="srilanka-svg-wrap">
           <svg
@@ -100,7 +129,7 @@ require_once __DIR__ . '/includes/header.php';
             aria-labelledby="sl-map-title sl-map-desc"
           >
             <title id="sl-map-title">Softrings International branch locations across Sri Lanka</title>
-            <desc id="sl-map-desc">District map of Sri Lanka. The eight Softrings corporate offices and showrooms are marked with pins in Colombo and Kandy districts, with live open or closed status.</desc>
+            <desc id="sl-map-desc">District map of Sri Lanka marking all <?= count($mapPins) ?> Softrings locations — corporate offices, SLT-Mobitel showrooms and group distribution stores — numbered to match the key beside the map.</desc>
             <defs>
               <linearGradient id="slLandGrad" x1="0.1" y1="0" x2="0.9" y2="1">
                 <stop offset="0%" stop-color="#EEF6EC"/>
@@ -140,27 +169,13 @@ require_once __DIR__ . '/includes/header.php';
               points="<?php
                   $corridor = [];
                   foreach (['moratuwa-branch', 'maharagama-hq', 'avissawella-branch', 'gampola-corp', 'kandy-regional'] as $corridorId) {
-                      foreach ($branches as $b) {
-                          if ($b['id'] === $corridorId) {
-                              $pt = sri_lanka_map_point((float) $b['lat'], (float) $b['lng']);
-                              $corridor[] = $pt['x'] . ',' . $pt['y'];
-                          }
+                      if (isset($mapById[$corridorId])) {
+                          $corridor[] = $mapById[$corridorId]['x'] . ',' . $mapById[$corridorId]['y'];
                       }
                   }
                   echo e(implode(' ', $corridor));
               ?>"
             />
-
-            <!-- City labels -->
-            <?php foreach ($cityLabels as $label):
-                $pt = sri_lanka_map_point($label[1], $label[2]);
-            ?>
-              <text
-                x="<?= $pt['x'] + 12 ?>"
-                y="<?= $pt['y'] + 4 ?>"
-                class="map-city-label"
-              ><?= e($label[0]) ?></text>
-            <?php endforeach; ?>
 
             <!-- Compass -->
             <g class="map-compass" transform="translate(414 58)" aria-hidden="true">
@@ -169,38 +184,158 @@ require_once __DIR__ . '/includes/header.php';
               <text x="0" y="15" text-anchor="middle">N</text>
             </g>
 
-            <!-- Branch pins -->
-            <?php foreach ($branches as $b):
-                $st = get_branch_live_status($b);
-                $pt = sri_lanka_map_point((float) $b['lat'], (float) $b['lng']);
+            <!-- Every location: offices, showrooms and group stores -->
+            <?php foreach ($mapPins as $index => $pin):
+                $number = $index + 1;
+                $offsetX = round($pin['tx'] - $pin['x'], 2);
+                $offsetY = round($pin['ty'] - $pin['y'], 2);
+                $label = $pin['city'] . ' — ' . $pin['type'];
+                if ($pin['is_open']) {
+                    $label .= ' (open now)';
+                }
             ?>
               <g
-                class="map-pin <?= $st['is_open'] ? 'is-open' : '' ?>"
-                data-target-branch="<?= e($b['id']) ?>"
+                class="map-pin map-pin--<?= e($pin['category']) ?><?= $pin['is_open'] ? ' is-open' : '' ?>"
+                data-target-location="<?= e($pin['id']) ?>"
+                data-anchor="<?= e($pin['anchor']) ?>"
+                data-anchor-kind="<?= e($pin['anchor_kind']) ?>"
+                data-category="<?= e($pin['category']) ?>"
+                data-province="<?= e($pin['province']) ?>"
+                data-open="<?= $pin['is_open'] ? '1' : '0' ?>"
+                data-search="<?= e($pin['search']) ?>"
+                data-number="<?= $number ?>"
+                transform="translate(<?= $pin['x'] ?> <?= $pin['y'] ?>)"
                 tabindex="0"
                 role="button"
-                aria-label="<?= e($b['city'] . ' — ' . $b['name'] . ($st['is_open'] ? ' (open now)' : ' (closed)')) ?>"
+                aria-label="<?= e($number . '. ' . $label) ?>"
               >
-                <circle cx="<?= $pt['x'] ?>" cy="<?= $pt['y'] ?>" r="11" class="map-pin__halo"/>
-                <circle cx="<?= $pt['x'] ?>" cy="<?= $pt['y'] ?>" r="5" class="map-pin__core"/>
-                <circle cx="<?= $pt['x'] ?>" cy="<?= $pt['y'] ?>" r="1.6" class="map-pin__dot"/>
+                <?php if ($pin['spread']): ?>
+                  <line class="map-pin__leader" x1="<?= $offsetX ?>" y1="<?= $offsetY ?>" x2="0" y2="0"/>
+                  <circle class="map-pin__origin" cx="<?= $offsetX ?>" cy="<?= $offsetY ?>" r="1.4"/>
+                <?php endif; ?>
+                <circle class="map-pin__hit" r="13"/>
+                <circle class="map-pin__halo" r="<?= $pin['category'] === 'store' ? 9 : 11 ?>"/>
+                <?php if ($pin['category'] === 'office'): ?>
+                  <rect class="map-pin__core" x="-4.8" y="-4.8" width="9.6" height="9.6" rx="1.6"/>
+                <?php else: ?>
+                  <circle class="map-pin__core" r="<?= $pin['category'] === 'store' ? 3.9 : 4.8 ?>"/>
+                <?php endif; ?>
+                <text class="map-pin__num" x="<?= $pin['category'] === 'store' ? 8.4 : 9.6 ?>" y="3"><?= $number ?></text>
               </g>
             <?php endforeach; ?>
           </svg>
         </div>
         <p class="srilanka-map-panel__count">
-          <strong><?= count($branches) ?></strong> centers across <?= count($activeProvinces) ?> provinces · <?= count($districts) ?> districts mapped
+          <strong><?= count($mapPins) ?></strong> locations mapped ·
+          <strong><?= $mapCounts['office'] ?></strong> offices ·
+          <strong><?= $mapCounts['showroom'] ?></strong> showrooms ·
+          <strong><?= $mapCounts['store'] ?></strong> group stores
         </p>
-        <div class="map-legend">
-          <span><i class="legend-dot legend-dot--blue"></i> Corporate / Regional Center</span>
-          <span><i class="legend-dot legend-dot--green"></i> Open Now (SLST)</span>
-          <span><i class="legend-swatch"></i> Western &amp; Central Province coverage</span>
-        </div>
         <p class="srilanka-map-panel__credit">
           District boundaries: <a href="https://mapsvg.com/maps/sri-lanka" rel="noopener nofollow">MapSVG</a> (CC BY 4.0)
         </p>
+      </div>
+
+      <!-- Zoomed detail for the dense western corridor -->
+      <div class="map-detail" aria-label="Greater Colombo corridor detail map">
+        <div class="srilanka-map-panel__head">
+          <strong>Greater Colombo Corridor</strong>
+          <span>Detail view</span>
+        </div>
+        <div class="map-detail__canvas">
+          <svg viewBox="0 0 420 380" class="map-detail__svg" role="img" aria-labelledby="sl-detail-title">
+            <title id="sl-detail-title">Detail map of the Softrings locations along the Colombo, Kaduwela, Homagama, Moratuwa and Avissawella corridor, numbered to match the national map.</title>
+            <defs>
+              <pattern id="detailGrid" width="26" height="26" patternUnits="userSpaceOnUse">
+                <path d="M26 0H0V26" fill="none" stroke="rgba(0,85,171,0.09)" stroke-width="1"/>
+              </pattern>
+            </defs>
+            <rect width="420" height="380" fill="url(#detailGrid)"/>
+
+            <!-- Road corridors, drawn as a guide only -->
+            <polyline class="map-detail__road" points="<?= e(implode(' ', $corridorPoints)) ?>"/>
+            <text class="map-detail__road-label" x="86" y="286" transform="rotate(-8 86 286)">High Level Road</text>
+            <text class="map-detail__road-label" x="196" y="272" transform="rotate(-40 196 272)">Avissawella Road</text>
+
+            <?php foreach ($detailPins as $dp):
+                $dOffsetX = round($dp['dx0'] - $dp['dx'], 2);
+                $dOffsetY = round($dp['dy0'] - $dp['dy'], 2);
+            ?>
+              <g
+                class="map-pin map-pin--detail map-pin--<?= e($dp['category']) ?><?= $dp['is_open'] ? ' is-open' : '' ?>"
+                data-target-location="<?= e($dp['id']) ?>"
+                data-anchor="<?= e($dp['anchor']) ?>"
+                data-anchor-kind="<?= e($dp['anchor_kind']) ?>"
+                data-category="<?= e($dp['category']) ?>"
+                data-province="<?= e($dp['province']) ?>"
+                data-open="<?= $dp['is_open'] ? '1' : '0' ?>"
+                data-search="<?= e($dp['search']) ?>"
+                data-number="<?= $dp['number'] ?>"
+                transform="translate(<?= $dp['dx'] ?> <?= $dp['dy'] ?>)"
+                tabindex="0"
+                role="button"
+                aria-label="<?= e($dp['number'] . '. ' . $dp['city'] . ' — ' . $dp['type']) ?>"
+              >
+                <?php if (hypot($dOffsetX, $dOffsetY) > 1 && hypot($dOffsetX, $dOffsetY) < 90): ?>
+                  <line class="map-pin__leader" x1="<?= $dOffsetX ?>" y1="<?= $dOffsetY ?>" x2="0" y2="0"/>
+                  <circle class="map-pin__origin" cx="<?= $dOffsetX ?>" cy="<?= $dOffsetY ?>" r="1.6"/>
+                <?php endif; ?>
+                <circle class="map-pin__hit" r="15"/>
+                <circle class="map-pin__halo" r="13"/>
+                <?php if ($dp['category'] === 'office'): ?>
+                  <rect class="map-pin__core" x="-5.6" y="-5.6" width="11.2" height="11.2" rx="1.8"/>
+                <?php else: ?>
+                  <circle class="map-pin__core" r="<?= $dp['category'] === 'store' ? 4.6 : 5.6 ?>"/>
+                <?php endif; ?>
+                <text class="map-pin__num" x="10.4" y="3.4"><?= $dp['number'] ?></text>
+              </g>
+            <?php endforeach; ?>
+          </svg>
+        </div>
+      </div>
+
+      <!-- Map key: legend + numbered index of all locations -->
+      <aside class="map-key" aria-label="Map key and location index">
+        <div class="map-key__legend">
+          <span><i class="map-key__marker map-key__marker--office"></i> Corporate Office</span>
+          <span><i class="map-key__marker map-key__marker--showroom"></i> Showroom</span>
+          <span><i class="map-key__marker map-key__marker--store"></i> Group Store</span>
+          <span><i class="map-key__marker map-key__marker--open"></i> Open Now (SLST)</span>
+        </div>
+        <ol class="map-key__list">
+          <?php foreach ($mapPins as $index => $pin): ?>
+            <li class="map-key__item" data-category="<?= e($pin['category']) ?>">
+              <button
+                type="button"
+                class="map-key__btn"
+                data-map-target="<?= e($pin['id']) ?>"
+                data-category="<?= e($pin['category']) ?>"
+                data-province="<?= e($pin['province']) ?>"
+                data-open="<?= $pin['is_open'] ? '1' : '0' ?>"
+                data-search="<?= e($pin['search']) ?>"
+              >
+                <span class="map-key__num"><?= $index + 1 ?></span>
+                <span class="map-key__text">
+                  <span class="map-key__city"><?= e($pin['label']) ?></span>
+                  <span class="map-key__type"><?= e($keyLabels[$pin['category']]) ?></span>
+                </span>
+              </button>
+            </li>
+          <?php endforeach; ?>
+        </ol>
       </aside>
 
+      <!-- One floating preview for both maps; positioned next to the marker -->
+      <div class="map-tooltip" id="map-tooltip" role="status" hidden>
+        <span class="map-tooltip__index"></span>
+        <strong class="map-tooltip__name"></strong>
+        <span class="map-tooltip__type"></span>
+        <span class="map-tooltip__meta"></span>
+        <span class="map-tooltip__hint">Click to open the full record</span>
+      </div>
+    </div>
+
+    <div class="branch-explorer branch-explorer--cards">
       <!-- Branch Cards List -->
       <div class="branch-cards-list" id="branch-cards-list">
         <?php foreach ($branches as $b):
@@ -286,7 +421,12 @@ require_once __DIR__ . '/includes/header.php';
         </thead>
         <tbody>
           <?php foreach ($extended as $tp): ?>
-            <tr>
+            <tr
+              id="<?= e($tp['id']) ?>"
+              data-extended-location
+              data-province="<?= e($tp['province']) ?>"
+              data-search="<?= e(strtolower($tp['city'] . ' ' . $tp['address'] . ' ' . $tp['province'])) ?>"
+            >
               <td><strong><?= e($tp['city']) ?></strong></td>
               <td><?= e($tp['address']) ?></td>
               <td class="mono-cell"><a href="tel:<?= e(preg_replace('/\s+/', '', $tp['phone'])) ?>"><?= e($tp['phone']) ?></a></td>

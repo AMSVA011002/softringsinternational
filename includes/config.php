@@ -435,15 +435,267 @@ function get_branches(): array
  */
 function get_extended_touchpoints(): array
 {
+    // Satellite group touchpoints. Coordinates are city-centre latitude and
+    // longitude so every one of them can be plotted on the operational map.
     return [
-        ['city' => 'Peradeniya (Kandy Office)', 'address' => 'No. 68, 2nd Floor, Gampola Road, Peradeniya', 'phone' => '+94 71 457 2606'],
-        ['city' => 'Colombo 11 (Pettah)', 'address' => 'No. 130/6, Main Street, Golden Plaza, Colombo 11', 'phone' => '+94 11 244 1113'],
-        ['city' => 'Kaduwela', 'address' => 'No. 452/2, New Kandy Road, Kaduwela', 'phone' => '+94 11 253 8988'],
-        ['city' => 'Athurugiriya', 'address' => 'No. 31, Godagama Road, Athurugiriya', 'phone' => '+94 11 274 2771'],
-        ['city' => 'Kadawatha', 'address' => 'No. 06, Kandy Road, Kadawatha', 'phone' => '+94 11 292 1712'],
-        ['city' => 'Kegalle', 'address' => 'No. 99/1, Main Street, Kegalle', 'phone' => '+94 35 222 2755'],
-        ['city' => 'Nuwara Eliya', 'address' => 'No. 4/1, Kandy Road, Nuwara Eliya', 'phone' => '+94 52 222 3110'],
+        ['id' => 'peradeniya-store', 'city' => 'Peradeniya (Kandy Office)', 'label' => 'Peradeniya', 'address' => 'No. 68, 2nd Floor, Gampola Road, Peradeniya', 'phone' => '+94 71 457 2606', 'district' => 'Kandy', 'province' => 'Central', 'lat' => 7.2583, 'lng' => 80.5933],
+        ['id' => 'pettah-store', 'city' => 'Colombo 11 (Pettah)', 'label' => 'Pettah', 'address' => 'No. 130/6, Main Street, Golden Plaza, Colombo 11', 'phone' => '+94 11 244 1113', 'district' => 'Colombo', 'province' => 'Western', 'lat' => 6.9355, 'lng' => 79.8487],
+        ['id' => 'kaduwela-store', 'city' => 'Kaduwela', 'label' => 'Kaduwela', 'address' => 'No. 452/2, New Kandy Road, Kaduwela', 'phone' => '+94 11 253 8988', 'district' => 'Colombo', 'province' => 'Western', 'lat' => 6.9333, 'lng' => 79.9833],
+        ['id' => 'athurugiriya-store', 'city' => 'Athurugiriya', 'label' => 'Athurugiriya', 'address' => 'No. 31, Godagama Road, Athurugiriya', 'phone' => '+94 11 274 2771', 'district' => 'Colombo', 'province' => 'Western', 'lat' => 6.8756, 'lng' => 80.0967],
+        ['id' => 'kadawatha-store', 'city' => 'Kadawatha', 'label' => 'Kadawatha', 'address' => 'No. 06, Kandy Road, Kadawatha', 'phone' => '+94 11 292 1712', 'district' => 'Gampaha', 'province' => 'Western', 'lat' => 6.9928, 'lng' => 79.9491],
+        ['id' => 'kegalle-store', 'city' => 'Kegalle', 'label' => 'Kegalle', 'address' => 'No. 99/1, Main Street, Kegalle', 'phone' => '+94 35 222 2755', 'district' => 'Kegalle', 'province' => 'Sabaragamuwa', 'lat' => 7.2513, 'lng' => 80.3464],
+        ['id' => 'nuwara-eliya-store', 'city' => 'Nuwara Eliya', 'label' => 'Nuwara Eliya', 'address' => 'No. 4/1, Kandy Road, Nuwara Eliya', 'phone' => '+94 52 222 3110', 'district' => 'Nuwara Eliya', 'province' => 'Central', 'lat' => 6.9708, 'lng' => 80.7829],
     ];
+}
+
+/**
+ * Every location that belongs on the operational map: the eight corporate
+ * offices / showrooms plus the seven satellite group touchpoints. Coordinates
+ * are projected and de-overlapped by layout_map_pins() before rendering.
+ *
+ * @return array<int, array<string, mixed>>
+ */
+function get_map_locations(): array
+{
+    $locations = [];
+
+    foreach (get_branches() as $b) {
+        $isOffice = stripos($b['type'], 'Corporate') !== false || stripos($b['type'], 'Head Office') !== false;
+        $locations[] = [
+            'id' => $b['id'],
+            'label' => $b['city'],
+            'name' => $b['name'],
+            'city' => $b['city'],
+            'type' => $b['type'],
+            'category' => $isOffice ? 'office' : 'showroom',
+            'province' => $b['province'],
+            'district' => $b['district'],
+            'address' => $b['address'],
+            'phone' => $b['phones'][0] ?? '',
+            'lat' => (float) $b['lat'],
+            'lng' => (float) $b['lng'],
+            'anchor' => $b['id'],
+            'anchor_kind' => 'card',
+            'is_open' => get_branch_live_status($b)['is_open'],
+            'search' => strtolower($b['name'] . ' ' . $b['city'] . ' ' . $b['address'] . ' ' . implode(' ', $b['services'])),
+        ];
+    }
+
+    foreach (get_extended_touchpoints() as $t) {
+        $locations[] = [
+            'id' => $t['id'],
+            'label' => $t['label'],
+            'name' => $t['city'] . ' — Group Store & Distribution Point',
+            'city' => $t['city'],
+            'type' => 'Group Store / Distribution Point',
+            'category' => 'store',
+            'province' => $t['province'],
+            'district' => $t['district'],
+            'address' => $t['address'],
+            'phone' => $t['phone'],
+            'lat' => (float) $t['lat'],
+            'lng' => (float) $t['lng'],
+            'anchor' => $t['id'],
+            'anchor_kind' => 'row',
+            'is_open' => false,
+            'search' => strtolower($t['city'] . ' ' . $t['address']),
+        ];
+    }
+
+    return $locations;
+}
+
+/**
+ * Zoomed projection for the Greater Colombo corridor.
+ *
+ * On the national map the eight western locations sit inside roughly thirty
+ * map units, which no amount of jittering can untangle. The detail view re-
+ * projects just that corridor onto its own, much larger canvas so each pin has
+ * room, and reuses the same number so the two maps stay linked.
+ *
+ * @return array{x: float, y: float}
+ */
+function sri_lanka_detail_point(float $lat, float $lng): array
+{
+    $window = [
+        'lng0' => 79.800,
+        'lng1' => 80.280,
+        'lat0' => 6.700,
+        'lat1' => 7.100,
+        'width' => 420.0,
+        'height' => 380.0,
+    ];
+
+    $x = (($lng - $window['lng0']) / ($window['lng1'] - $window['lng0'])) * $window['width'];
+    $y = (($window['lat1'] - $lat) / ($window['lat1'] - $window['lat0'])) * $window['height'];
+
+    return ['x' => round($x, 2), 'y' => round($y, 2)];
+}
+
+/** Locations shown on the zoomed western-corridor detail map. */
+function get_detail_location_ids(): array
+{
+    return [
+        'pettah-store',
+        'kadawatha-store',
+        'maharagama-hq',
+        'maharagama-mobitel',
+        'nugegoda-tech',
+        'homagama-flagship',
+        'kaduwela-store',
+        'athurugiriya-store',
+        'moratuwa-branch',
+        'avissawella-branch',
+    ];
+}
+
+/**
+ * Build the detail-view pins, numbered to match the national map.
+ *
+ * @param array<int, array<string, mixed>> $mapPins output of layout_map_pins()
+ * @return array<int, array<string, mixed>>
+ */
+function layout_detail_pins(array $mapPins, float $minDistance = 30.0): array
+{
+    $detailIds = get_detail_location_ids();
+    $numbers = [];
+    foreach ($mapPins as $index => $pin) {
+        $numbers[$pin['id']] = $index + 1;
+    }
+
+    $pins = [];
+    foreach ($mapPins as $pin) {
+        if (!in_array($pin['id'], $detailIds, true)) {
+            continue;
+        }
+        $point = sri_lanka_detail_point($pin['lat'], $pin['lng']);
+        $pins[] = $pin + [
+            'dx' => $point['x'],
+            'dy' => $point['y'],
+            'dx0' => $point['x'],
+            'dy0' => $point['y'],
+            'number' => $numbers[$pin['id']],
+        ];
+    }
+
+    $count = count($pins);
+    for ($iteration = 0; $iteration < 300; $iteration++) {
+        for ($i = 0; $i < $count; $i++) {
+            for ($j = $i + 1; $j < $count; $j++) {
+                $dx = $pins[$j]['dx'] - $pins[$i]['dx'];
+                $dy = $pins[$j]['dy'] - $pins[$i]['dy'];
+                $distance = sqrt($dx * $dx + $dy * $dy);
+                if ($distance >= $minDistance) {
+                    continue;
+                }
+                if ($distance < 0.01) {
+                    $dx = 1.0;
+                    $dy = 0.0;
+                    $distance = 1.0;
+                }
+                $push = ($minDistance - $distance) / 2;
+                $ux = $dx / $distance;
+                $uy = $dy / $distance;
+                $pins[$i]['dx'] -= $ux * $push;
+                $pins[$i]['dy'] -= $uy * $push;
+                $pins[$j]['dx'] += $ux * $push;
+                $pins[$j]['dy'] += $uy * $push;
+            }
+        }
+        foreach ($pins as &$pin) {
+            $pin['dx'] += ($pin['dx0'] - $pin['dx']) * 0.03;
+            $pin['dy'] += ($pin['dy0'] - $pin['dy']) * 0.03;
+            $pin['dx'] = max(14.0, min(406.0, $pin['dx']));
+            $pin['dy'] = max(14.0, min(366.0, $pin['dy']));
+        }
+        unset($pin);
+    }
+
+    foreach ($pins as &$pin) {
+        $pin['dx'] = round($pin['dx'], 2);
+        $pin['dy'] = round($pin['dy'], 2);
+    }
+    unset($pin);
+
+    return $pins;
+}
+
+/**
+ * Project every location onto the map viewBox and push overlapping pins apart.
+ *
+ * Nine of the fifteen locations sit inside the Colombo–Avissawella corridor, so
+ * a raw projection stacks them into a single blob. This is a small deterministic
+ * force relaxation: neighbours repel, and a weak spring pulls each pin back
+ * toward its true coordinate so the group never drifts off its district. Pins
+ * that moved get a leader line (`tx`,`ty` is the true point).
+ *
+ * @param array<int, array<string, mixed>> $locations
+ * @return array<int, array<string, mixed>>
+ */
+function layout_map_pins(array $locations, float $minDistance = 17.0, int $iterations = 420): array
+{
+    $pins = [];
+    foreach ($locations as $location) {
+        $point = sri_lanka_map_point($location['lat'], $location['lng']);
+        $pins[] = $location + [
+            'tx' => $point['x'],
+            'ty' => $point['y'],
+            'x' => $point['x'],
+            'y' => $point['y'],
+        ];
+    }
+
+    $count = count($pins);
+    $spring = 0.02;
+
+    for ($iteration = 0; $iteration < $iterations; $iteration++) {
+        for ($i = 0; $i < $count; $i++) {
+            for ($j = $i + 1; $j < $count; $j++) {
+                $dx = $pins[$j]['x'] - $pins[$i]['x'];
+                $dy = $pins[$j]['y'] - $pins[$i]['y'];
+                $distance = sqrt($dx * $dx + $dy * $dy);
+
+                if ($distance >= $minDistance) {
+                    continue;
+                }
+
+                // Coincident pins get a deterministic direction so the layout is
+                // stable between requests.
+                if ($distance < 0.01) {
+                    $angle = (($i * 7 + $j * 13) % 24) * (M_PI / 12);
+                    $dx = cos($angle);
+                    $dy = sin($angle);
+                    $distance = 1.0;
+                }
+
+                $push = ($minDistance - $distance) / 2;
+                $ux = $dx / $distance;
+                $uy = $dy / $distance;
+                $pins[$i]['x'] -= $ux * $push;
+                $pins[$i]['y'] -= $uy * $push;
+                $pins[$j]['x'] += $ux * $push;
+                $pins[$j]['y'] += $uy * $push;
+            }
+        }
+
+        foreach ($pins as &$pin) {
+            $pin['x'] += ($pin['tx'] - $pin['x']) * $spring;
+            $pin['y'] += ($pin['ty'] - $pin['y']) * $spring;
+            // Keep every pin inside the drawn island.
+            $pin['x'] = max(8.0, min(442.0, $pin['x']));
+            $pin['y'] = max(8.0, min(785.0, $pin['y']));
+        }
+        unset($pin);
+    }
+
+    foreach ($pins as &$pin) {
+        $pin['x'] = round($pin['x'], 2);
+        $pin['y'] = round($pin['y'], 2);
+        $pin['spread'] = abs($pin['x'] - $pin['tx']) > 0.6 || abs($pin['y'] - $pin['ty']) > 0.6;
+    }
+    unset($pin);
+
+    return $pins;
 }
 
 /**

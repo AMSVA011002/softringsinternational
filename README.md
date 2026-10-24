@@ -37,6 +37,19 @@ Interactive behaviour lives in `assets/js/main.js`: hero slider (6.5s auto-advan
 - Pins: every branch in `includes/config.php` carries its real `lat`/`lng`, projected onto that viewBox by `sri_lanka_map_point()`. The helper applies a measured calibration offset so all eight coordinates fall inside their own district polygon (verified with `isPointInFill`).
 - Western and Central districts are tinted, districts that hold a branch are highlighted, and pin colour still reflects the live SLST open/closed status.
 
+#### Full network map (all 15 locations)
+
+`get_map_locations()` in `includes/config.php` merges the 8 branches (2 corporate offices + 6 SLT-Mobitel showrooms) with the 7 group distribution stores, so nothing the company operates is left off the map. They are drawn twice, side by side:
+
+| Panel | Contents | Projection |
+| --- | --- | --- |
+| Sri Lanka Operational Map | all 15 markers, numbered 1–15, with dashed leader lines to their true coordinates | `layout_map_pins()` relaxes overlapping pins to a 17-unit minimum separation on the `0 0 450 793` island viewBox |
+| Greater Colombo Corridor | the 10 locations in the Western/Central corridor at street scale, plus road polylines and labels | `sri_lanka_detail_point()` maps 79.80–80.28 E / 6.70–7.10 N onto `0 0 420 380`; `layout_detail_pins()` keeps 30 units between markers |
+
+Markers carry three shapes — filled navy square (office), blue dot (showroom), outlined dot (group store) — plus a green halo while open in SLST time. Hover, focus and tap open a single `#map-tooltip` preview that is filled from the rendered card or table row, so the copy is already translated. Clicking a marker or a number in the key scrolls to the matching record; hovering a card or row highlights its marker.
+
+The legend doubles as a keyboard-accessible index: every numbered button maps to a pin and to an anchor in the branch cards or store table. The province pills, the search box and "Open Now Only" dim non-matching markers (`.is-muted`) rather than removing them, so the shape of the network stays readable, and they honour both English and Sinhala spellings of a place name.
+
 ### Placeholder staff portraits
 
 Board directors and functional managers currently use generated placeholder portraits in `assets/images/team/` (monogram + "photo to follow" on a brand gradient). Each person's `photo` path is stored in `includes/config.php`, so replacing a real photograph only requires overwriting the file or changing that one key.
@@ -61,7 +74,7 @@ re-pointed at Noto Sans/Serif Sinhala, uppercase tracking is relaxed, and button
 - **Authentic Sri Lankan Corporate Data:** Verified group history (Est. 2000 Group / 11 September 2009 Softrings International), subsidiaries matrix, Board of Directors & executive management, and 8 core showrooms/offices across Western and Central Provinces.
 - **Live Sri Lanka Standard Time (`Asia/Colombo`) Telemetry:** Server-side PHP + client-side JS real-time clock and automatic per-branch Open/Closed status calculation.
 - **Bilingual Site (English / සිංහල):** The header switcher translates the *entire* site — navigation, page copy, branch records, forms, validation messages, modals and page titles. The catalogue lives in `assets/js/i18n-si.js` and the choice is remembered in `localStorage`, so every page you open afterwards loads in Sinhala.
-- **Interactive Sri Lanka SVG Branch Explorer (`branches.php`):** Filter by province, search by city/service, filter by currently open branches, and click nodes on the Sri Lanka map.
+- **Interactive Sri Lanka SVG Network Map (`branches.php`):** All 15 locations — 2 corporate offices, 6 SLT-Mobitel showrooms and 7 group stores — plotted on a national map and a street-level Greater Colombo corridor map, with numbered markers, a keyboard-accessible key, hover previews and click-through to each record. Province, text search and "open now" filters dim non-matching markers in both English and Sinhala.
 - **Softrings mPOS & Sub-Dealer Margin Estimator (`services.php`):** Interactive LKR (`Rs.`) monthly retail revenue calculator for prospective sub-dealers and mPOS merchants.
 - **Full PHP + SQLite3 Persistence (`api.php`, `contact.php`, `careers.php`):** CSRF-protected corporate/dealer inquiry desk and HR recruitment portal with automatic SQLite3 initialization (and JSON fallback) plus real-time Reference Code (`SFT-YYYY-XXXXX` / `HR-SFT-XXXXX`) lookup modal.
 - **Print-Ready Corporate Dossier:** Built-in `@media print` stylesheet for exporting a clean PDF summary.
