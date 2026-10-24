@@ -3988,6 +3988,15 @@ html[data-lang='si'] .branch-card {
   box-shadow: inset 0 0 0 1.5px var(--atr-blue);
 }
 
+/* Key numbers echo the green halo the live marker gets while the branch is open. */
+.map-key__item.is-open .map-key__num {
+  box-shadow: 0 0 0 3px rgba(58, 194, 42, 0.28);
+}
+
+.map-key__item[data-category='store'].is-open .map-key__num {
+  box-shadow: inset 0 0 0 1.5px var(--atr-blue), 0 0 0 3px rgba(58, 194, 42, 0.28);
+}
+
 .map-key__text {
   display: grid;
   min-width: 0;
