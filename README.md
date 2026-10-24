@@ -41,6 +41,18 @@ Interactive behaviour lives in `assets/js/main.js`: hero slider (6.5s auto-advan
 
 Board directors and functional managers currently use generated placeholder portraits in `assets/images/team/` (monogram + "photo to follow" on a brand gradient). Each person's `photo` path is stored in `includes/config.php`, so replacing a real photograph only requires overwriting the file or changing that one key.
 
+### Sinhala translation
+
+Every visible string is catalogued in `assets/js/i18n-si.js` as `English → Sinhala`. `main.js` (§3) applies it in three
+layers: whole-block templates (`{0}`, `{1}` slots) where a sentence is split by a link or `<strong>`, plain text nodes,
+and translatable attributes (`placeholder`, `aria-label`, `title`, `alt`, meta description, `<title>`). Switching back
+to English restores the captured originals, so repeated toggles never drift. Time-dependent labels (the SLST clock,
+"open now" pills, tracker results, calculator units) are produced by `SR.t()` in `main.js` so they stay translated
+between the 30-second telemetry refreshes.
+
+Sinhala typography is handled in `atrium.css` §19: the `--font-sans` / `--font-serif` / `--font-mono` tokens are
+re-pointed at Noto Sans/Serif Sinhala, uppercase tracking is relaxed, and buttons/inputs inherit the page typeface.
+
 ### Scroll-to-top control
 
 `includes/footer.php` ships a floating back-to-top button that appears after 420px of scrolling, draws a circular reading-progress ring, and smooth-scrolls to the top (respecting `prefers-reduced-motion`). It is keyboard focusable and hidden in print.
@@ -48,7 +60,7 @@ Board directors and functional managers currently use generated placeholder port
 ## Key Features
 - **Authentic Sri Lankan Corporate Data:** Verified group history (Est. 2000 Group / 11 September 2009 Softrings International), subsidiaries matrix, Board of Directors & executive management, and 8 core showrooms/offices across Western and Central Provinces.
 - **Live Sri Lanka Standard Time (`Asia/Colombo`) Telemetry:** Server-side PHP + client-side JS real-time clock and automatic per-branch Open/Closed status calculation.
-- **Trilingual Identity Ribbon:** Instant switcher across **English**, **සිංහල (Sinhala)**, and **தமிழ் (Tamil)** with `localStorage` persistence.
+- **Bilingual Site (English / සිංහල):** The header switcher translates the *entire* site — navigation, page copy, branch records, forms, validation messages, modals and page titles. The catalogue lives in `assets/js/i18n-si.js` and the choice is remembered in `localStorage`, so every page you open afterwards loads in Sinhala.
 - **Interactive Sri Lanka SVG Branch Explorer (`branches.php`):** Filter by province, search by city/service, filter by currently open branches, and click nodes on the Sri Lanka map.
 - **Softrings mPOS & Sub-Dealer Margin Estimator (`services.php`):** Interactive LKR (`Rs.`) monthly retail revenue calculator for prospective sub-dealers and mPOS merchants.
 - **Full PHP + SQLite3 Persistence (`api.php`, `contact.php`, `careers.php`):** CSRF-protected corporate/dealer inquiry desk and HR recruitment portal with automatic SQLite3 initialization (and JSON fallback) plus real-time Reference Code (`SFT-YYYY-XXXXX` / `HR-SFT-XXXXX`) lookup modal.
@@ -118,7 +130,7 @@ python3 -m http.server 8099 -d _site   # preview the static build
 ### Static vs. PHP hosting
 | Capability | PHP hosting (Apache/Nginx/PHP-FPM) | GitHub Pages (static) |
 | --- | --- | --- |
-| All pages, styling, map, calculator, trilingual switcher | ✅ | ✅ |
+| All pages, styling, map, calculator, English/Sinhala switcher | ✅ | ✅ |
 | Inquiry & HR forms | ✅ CSRF-validated, saved to SQLite3/JSON | ✅ Recorded in the browser ledger with a reference code + pre-filled email hand-off |
 | Server-side reference lookup (`SFT-…` / `HR-SFT-…`) | ✅ Across all visitors | ✅ For references created in the same browser |
 

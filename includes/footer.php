@@ -137,6 +137,7 @@ $groupEntities = get_group_entities();
     </div>
   </footer>
 
+  <script src="assets/js/i18n-si.js" defer></script>
   <script src="assets/js/main.js" defer></script>
 </body>
 </html>
