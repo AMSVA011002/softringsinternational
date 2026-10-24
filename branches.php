@@ -1,6 +1,7 @@
 <?php
 declare(strict_types=1);
 require_once __DIR__ . '/includes/config.php';
+require_once __DIR__ . '/includes/sri-lanka-districts.php';
 
 $pageTitle = 'Island-Wide Branch & Corporate Office Network';
 $pageDescription = 'Locate Softrings International (Pvt) Ltd corporate offices and Authorized SLT-Mobitel showrooms in Maharagama, Gampola, Homagama, Kandy, Avissawella, Moratuwa, and Nugegoda, Sri Lanka.';
@@ -8,6 +9,17 @@ $activeNav = 'branches';
 
 $branches = get_branches();
 $extended = get_extended_touchpoints();
+$districts = get_sri_lanka_districts();
+
+// Provinces where Softrings operates, and the districts that hold a branch —
+// both are used to tint the map so the network reads at a glance.
+$activeProvinces = ['Western', 'Central'];
+$branchDistricts = ['colombo', 'kandy'];
+$cityLabels = [
+    ['Maharagama', 6.8448, 79.9285],
+    ['Kandy', 7.2955, 80.6378],
+    ['Gampola', 7.1644, 80.5766],
+];
 
 require_once __DIR__ . '/includes/header.php';
 ?>
@@ -74,73 +86,119 @@ require_once __DIR__ . '/includes/header.php';
     </div>
 
     <div class="branch-explorer">
-      <!-- Interactive Sri Lanka SVG Network Map -->
+      <!-- Interactive Sri Lanka District Map -->
       <aside class="srilanka-map-panel" aria-label="Sri Lanka Branch Network Map">
         <div class="srilanka-map-panel__head">
           <strong>Sri Lanka Operational Map</strong>
           <span>Click a node to inspect hub</span>
         </div>
         <div class="srilanka-svg-wrap">
-          <svg viewBox="0 0 360 520" class="srilanka-svg" role="img" aria-label="Map of Sri Lanka highlighting Softrings International branches in Western and Central Provinces">
+          <svg
+            viewBox="0 0 450 793"
+            class="srilanka-svg"
+            role="img"
+            aria-labelledby="sl-map-title sl-map-desc"
+          >
+            <title id="sl-map-title">Softrings International branch locations across Sri Lanka</title>
+            <desc id="sl-map-desc">District map of Sri Lanka. The eight Softrings corporate offices and showrooms are marked with pins in Colombo and Kandy districts, with live open or closed status.</desc>
             <defs>
               <linearGradient id="slLandGrad" x1="0.1" y1="0" x2="0.9" y2="1">
-                <stop offset="0%" stop-color="#E8F7E4"/>
-                <stop offset="48%" stop-color="#E4F1FC"/>
-                <stop offset="100%" stop-color="#CFE4F7"/>
+                <stop offset="0%" stop-color="#EEF6EC"/>
+                <stop offset="52%" stop-color="#EDF3FB"/>
+                <stop offset="100%" stop-color="#DFEBF8"/>
               </linearGradient>
-              <linearGradient id="slCoastGrad" x1="0" y1="0" x2="1" y2="1">
-                <stop offset="0%" stop-color="#3AC22A"/>
-                <stop offset="100%" stop-color="#0055AB"/>
+              <linearGradient id="slActiveGrad" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stop-color="#DDF3D6"/>
+                <stop offset="100%" stop-color="#CFE6FA"/>
               </linearGradient>
               <filter id="slLandShadow" x="-20%" y="-20%" width="140%" height="140%">
-                <feDropShadow dx="0" dy="6" stdDeviation="7" flood-color="#00306F" flood-opacity="0.18"/>
+                <feDropShadow dx="0" dy="5" stdDeviation="6" flood-color="#00306F" flood-opacity="0.2"/>
               </filter>
             </defs>
-            <!-- Stylized Accurate Sri Lanka Island Silhouette -->
-            <path
-              d="M150,28 C164,34 176,52 184,72 C195,98 214,126 232,162 C252,202 274,248 282,296 C289,338 284,386 262,424 C240,462 202,486 164,488 C132,489 106,470 96,440 C86,410 92,374 90,338 C88,298 78,258 84,218 C90,178 106,144 114,108 C120,80 124,48 136,32 C140,27 145,26 150,28 Z"
-              fill="url(#slLandGrad)"
-              stroke="url(#slCoastGrad)"
-              stroke-width="2.4"
-              stroke-opacity="0.55"
-              filter="url(#slLandShadow)"
-            />
-            <!-- Western & Central Corridor Connection Line -->
-            <polyline
-              points="102,380 112,364 105,355 126,366 146,344 182,306 191,286"
-              fill="none"
-              stroke="#0055AB"
-              stroke-width="2"
-              stroke-dasharray="4 4"
-              opacity="0.55"
-            />
-            <!-- Regional Labels -->
-            <text x="198" y="274" class="map-region-label">Kandy</text>
-            <text x="194" y="312" class="map-region-label">Gampola</text>
-            <text x="154" y="342" class="map-region-label">Avissawella</text>
-            <text x="40" y="362" class="map-region-label">Colombo / Maharagama</text>
-            <text x="38" y="394" class="map-region-label">Moratuwa</text>
 
+            <!-- District polygons: real Sri Lanka boundaries -->
+            <g class="sl-districts" filter="url(#slLandShadow)">
+              <?php foreach ($districts as $district):
+                  $isActive = in_array($district['province'], $activeProvinces, true);
+                  $hasBranch = in_array($district['id'], $branchDistricts, true);
+              ?>
+                <path
+                  d="<?= e($district['path']) ?>"
+                  class="sl-district<?= $isActive ? ' is-active-province' : '' ?><?= $hasBranch ? ' has-branch' : '' ?>"
+                  data-district="<?= e($district['id']) ?>"
+                  data-district-name="<?= e($district['name']) ?>"
+                  data-province="<?= e($district['province']) ?>"
+                >
+                  <title><?= e($district['name']) ?> District · <?= e($district['province']) ?> Province</title>
+                </path>
+              <?php endforeach; ?>
+            </g>
+
+            <!-- Operational corridor: Western coast to Central highlands -->
+            <polyline
+              class="sl-corridor"
+              points="<?php
+                  $corridor = [];
+                  foreach (['moratuwa-branch', 'maharagama-hq', 'avissawella-branch', 'gampola-corp', 'kandy-regional'] as $corridorId) {
+                      foreach ($branches as $b) {
+                          if ($b['id'] === $corridorId) {
+                              $pt = sri_lanka_map_point((float) $b['lat'], (float) $b['lng']);
+                              $corridor[] = $pt['x'] . ',' . $pt['y'];
+                          }
+                      }
+                  }
+                  echo e(implode(' ', $corridor));
+              ?>"
+            />
+
+            <!-- City labels -->
+            <?php foreach ($cityLabels as $label):
+                $pt = sri_lanka_map_point($label[1], $label[2]);
+            ?>
+              <text
+                x="<?= $pt['x'] + 12 ?>"
+                y="<?= $pt['y'] + 4 ?>"
+                class="map-city-label"
+              ><?= e($label[0]) ?></text>
+            <?php endforeach; ?>
+
+            <!-- Compass -->
+            <g class="map-compass" transform="translate(414 58)" aria-hidden="true">
+              <circle cx="0" cy="0" r="17"/>
+              <path d="M0,-11 L4.5,4 L0,1.4 L-4.5,4 Z"/>
+              <text x="0" y="15" text-anchor="middle">N</text>
+            </g>
+
+            <!-- Branch pins -->
             <?php foreach ($branches as $b):
                 $st = get_branch_live_status($b);
+                $pt = sri_lanka_map_point((float) $b['lat'], (float) $b['lng']);
             ?>
               <g
                 class="map-pin <?= $st['is_open'] ? 'is-open' : '' ?>"
                 data-target-branch="<?= e($b['id']) ?>"
                 tabindex="0"
                 role="button"
-                aria-label="<?= e($b['name']) ?>"
+                aria-label="<?= e($b['city'] . ' — ' . $b['name'] . ($st['is_open'] ? ' (open now)' : ' (closed)')) ?>"
               >
-                <circle cx="<?= (int) $b['map_x'] ?>" cy="<?= (int) $b['map_y'] ?>" r="11" class="map-pin__halo"/>
-                <circle cx="<?= (int) $b['map_x'] ?>" cy="<?= (int) $b['map_y'] ?>" r="5.5" class="map-pin__core"/>
+                <circle cx="<?= $pt['x'] ?>" cy="<?= $pt['y'] ?>" r="11" class="map-pin__halo"/>
+                <circle cx="<?= $pt['x'] ?>" cy="<?= $pt['y'] ?>" r="5" class="map-pin__core"/>
+                <circle cx="<?= $pt['x'] ?>" cy="<?= $pt['y'] ?>" r="1.6" class="map-pin__dot"/>
               </g>
             <?php endforeach; ?>
           </svg>
         </div>
+        <p class="srilanka-map-panel__count">
+          <strong><?= count($branches) ?></strong> centers across <?= count($activeProvinces) ?> provinces · <?= count($districts) ?> districts mapped
+        </p>
         <div class="map-legend">
           <span><i class="legend-dot legend-dot--blue"></i> Corporate / Regional Center</span>
           <span><i class="legend-dot legend-dot--green"></i> Open Now (SLST)</span>
+          <span><i class="legend-swatch"></i> Western &amp; Central Province coverage</span>
         </div>
+        <p class="srilanka-map-panel__credit">
+          District boundaries: <a href="https://mapsvg.com/maps/sri-lanka" rel="noopener nofollow">MapSVG</a> (CC BY 4.0)
+        </p>
       </aside>
 
       <!-- Branch Cards List -->

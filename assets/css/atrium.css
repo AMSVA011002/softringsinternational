@@ -1376,7 +1376,7 @@ p {
 .atr-member__portrait {
   position: relative;
   display: block;
-  height: 210px;
+  height: 240px;
   overflow: hidden;
   background: linear-gradient(135deg, var(--atr-navy) 0%, var(--atr-blue) 58%, #0b74cf 100%);
 }
@@ -1402,6 +1402,37 @@ p {
   left: -60px;
   bottom: -70px;
   border-color: rgba(58, 194, 42, 0.4);
+}
+
+.atr-member__photo {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center top;
+  transition: transform 0.6s var(--atr-ease), filter 0.3s var(--atr-ease);
+}
+
+.atr-member:hover .atr-member__photo,
+.atr-member:focus-visible .atr-member__photo {
+  transform: scale(1.045);
+}
+
+.atr-member__tag {
+  position: absolute;
+  left: 16px;
+  bottom: 16px;
+  z-index: 1;
+  padding: 4px 9px;
+  background: rgba(0, 19, 48, 0.72);
+  border-left: 2px solid var(--atr-accent);
+  font-family: var(--font-mono);
+  font-size: 0.56rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #cfe4ff;
 }
 
 .atr-member__monogram {
@@ -1515,6 +1546,19 @@ p {
   background: var(--atr-navy);
   border-color: var(--atr-navy);
   color: #fff;
+}
+
+.atr-modal__photo {
+  width: 116px;
+  height: 145px;
+  object-fit: cover;
+  object-position: center top;
+  margin-bottom: 18px;
+  border-left: 3px solid var(--atr-accent);
+}
+
+.atr-modal__photo[hidden] {
+  display: none;
 }
 
 .atr-modal__role {
@@ -2289,7 +2333,7 @@ p {
 
 .director-card {
   display: grid;
-  grid-template-columns: 128px minmax(0, 1fr);
+  grid-template-columns: 132px minmax(0, 1fr);
   gap: 22px;
   padding: 26px;
   background: #fff;
@@ -2304,17 +2348,34 @@ p {
   box-shadow: 0 16px 38px rgba(0, 19, 48, 0.1);
 }
 
-.director-card__avatar {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 128px;
-  height: 150px;
-  border-radius: 0;
-  background: linear-gradient(135deg, var(--atr-navy) 0%, var(--atr-blue) 100%);
-  font-family: var(--atr-serif);
-  font-size: 2.4rem;
-  color: #fff;
+.director-card__figure {
+  position: relative;
+  margin: 0;
+  width: 132px;
+  align-self: start;
+}
+
+.director-card__photo {
+  width: 132px;
+  height: 165px;
+  object-fit: cover;
+  object-position: center top;
+  border-left: 3px solid var(--atr-accent);
+  background: var(--atr-navy);
+}
+
+.director-card__pending {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  padding: 2px 6px;
+  background: rgba(0, 19, 48, 0.82);
+  font-family: var(--font-mono);
+  font-size: 0.5rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #cfe4ff;
 }
 
 .director-card__role {
@@ -2352,10 +2413,49 @@ p {
 }
 
 .mgr-item {
-  padding: 20px;
+  display: grid;
+  grid-template-columns: 104px minmax(0, 1fr);
+  grid-template-areas:
+    "photo dept"
+    "photo name"
+    "photo role"
+    "photo mail";
+  align-content: start;
+  gap: 2px 16px;
+  padding: 0 18px 0 0;
   background: #fff;
   border: 1px solid var(--atr-line);
   transition: border-color 0.22s var(--atr-ease);
+}
+
+.mgr-item__dept {
+  grid-area: dept;
+  margin-top: 16px;
+}
+
+.mgr-item__name {
+  grid-area: name;
+}
+
+.mgr-item__role {
+  grid-area: role;
+}
+
+.mgr-item__email {
+  grid-area: mail;
+  margin-bottom: 16px;
+}
+
+.mgr-item__photo {
+  grid-area: photo;
+  align-self: stretch;
+  width: 104px;
+  height: 100%;
+  min-height: 148px;
+  object-fit: cover;
+  object-position: center top;
+  border-right: 3px solid var(--atr-accent);
+  background: var(--atr-navy);
 }
 
 .mgr-item:hover {
@@ -2368,6 +2468,7 @@ p {
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--atr-muted);
+  line-height: 1.5;
 }
 
 .mgr-item__name {
@@ -2384,9 +2485,10 @@ p {
 
 .mgr-item__email {
   display: inline-block;
-  margin-top: 8px;
+  margin-top: 6px;
   font-family: var(--font-mono);
   font-size: 0.72rem;
+  overflow-wrap: anywhere;
 }
 
 /* Timeline --------------------------------------------------------------- */
@@ -2844,9 +2946,18 @@ p {
     grid-template-columns: minmax(0, 1fr);
   }
 
-  .director-card__avatar {
+  .director-card__figure {
     width: 100%;
-    height: 110px;
+  }
+
+  .director-card__photo {
+    width: 100%;
+    height: 190px;
+    object-position: center top;
+  }
+
+  .atr-member__portrait {
+    height: 220px;
   }
 
   .page-hero {
@@ -3063,5 +3174,354 @@ p {
 
   .atr-hero__slide.is-active .atr-hero__media {
     transform: none;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   17. Branch map — real Sri Lanka district geometry
+   -------------------------------------------------------------------------- */
+
+.srilanka-map-panel {
+  border-radius: 0;
+  background: #fff;
+  border: 1px solid var(--atr-line);
+  padding: 18px 18px 16px;
+  top: 108px;
+}
+
+.srilanka-map-panel__head strong {
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--atr-navy);
+}
+
+.srilanka-map-panel__head span {
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--atr-muted);
+}
+
+.srilanka-svg-wrap {
+  border-radius: 0;
+  border: 0;
+  background: linear-gradient(180deg, #f7fbff 0%, #ffffff 78%);
+  padding: 6px 4px;
+}
+
+.srilanka-svg {
+  width: 100%;
+  height: auto;
+  max-height: 560px;
+}
+
+.sl-district {
+  fill: url(#slLandGrad);
+  stroke: #b9cbdd;
+  stroke-width: 0.65;
+  stroke-linejoin: round;
+  transition: fill 0.2s var(--atr-ease), stroke 0.2s var(--atr-ease);
+}
+
+.sl-district.is-active-province {
+  fill: url(#slActiveGrad);
+  stroke: #9db7d1;
+}
+
+.sl-district.has-branch {
+  fill: #d6eecd;
+  stroke: var(--atr-accent-dark);
+  stroke-width: 0.9;
+}
+
+.sl-district:hover {
+  fill: #c9e6f9;
+  stroke: var(--atr-navy);
+}
+
+.sl-corridor {
+  fill: none;
+  stroke: var(--atr-blue);
+  stroke-width: 1.6;
+  stroke-dasharray: 5 5;
+  stroke-linecap: round;
+  opacity: 0.5;
+}
+
+.map-city-label {
+  font-family: var(--font-mono);
+  font-size: 8px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  fill: var(--atr-navy);
+  paint-order: stroke;
+  stroke: #ffffff;
+  stroke-width: 2.4px;
+  stroke-linejoin: round;
+}
+
+.map-compass circle {
+  fill: #fff;
+  stroke: #c3d5e6;
+  stroke-width: 1;
+}
+
+.map-compass path {
+  fill: var(--atr-accent);
+}
+
+.map-compass text {
+  font-family: var(--font-mono);
+  font-size: 7px;
+  font-weight: 700;
+  fill: var(--atr-navy);
+}
+
+.map-pin {
+  cursor: pointer;
+  outline: none;
+}
+
+.map-pin__halo {
+  fill: rgba(0, 85, 171, 0.16);
+  transition: r 0.2s var(--atr-ease), fill 0.2s var(--atr-ease);
+}
+
+.map-pin__core {
+  fill: var(--atr-navy);
+  stroke: #fff;
+  stroke-width: 1.6;
+  transition: fill 0.2s var(--atr-ease), r 0.2s var(--atr-ease);
+}
+
+.map-pin__dot {
+  fill: #fff;
+  pointer-events: none;
+}
+
+.map-pin.is-open .map-pin__halo {
+  fill: rgba(58, 194, 42, 0.24);
+}
+
+.map-pin.is-open .map-pin__core {
+  fill: var(--atr-accent-dark);
+}
+
+.map-pin:hover .map-pin__halo,
+.map-pin:focus-visible .map-pin__halo,
+.map-pin.is-selected .map-pin__halo {
+  r: 15px;
+  fill: rgba(58, 194, 42, 0.42);
+}
+
+.map-pin:hover .map-pin__core,
+.map-pin:focus-visible .map-pin__core,
+.map-pin.is-selected .map-pin__core {
+  r: 6.4px;
+  fill: var(--atr-accent);
+  stroke: var(--atr-navy);
+}
+
+.map-pin:focus-visible .map-pin__halo {
+  stroke: var(--atr-navy);
+  stroke-width: 1.2;
+}
+
+.srilanka-map-panel__count {
+  margin: 12px 0 0;
+  padding-top: 10px;
+  border-top: 1px solid var(--atr-line);
+  font-size: 0.74rem;
+  color: var(--atr-muted);
+  letter-spacing: 0.01em;
+}
+
+.srilanka-map-panel__count strong {
+  color: var(--atr-navy);
+}
+
+.srilanka-map-panel .map-legend {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 5px;
+  margin-top: 8px;
+  font-size: 0.72rem;
+  color: #46556b;
+}
+
+.srilanka-map-panel .legend-dot--blue {
+  background: var(--atr-navy);
+}
+
+.srilanka-map-panel .legend-dot--green {
+  background: var(--atr-accent);
+}
+
+.legend-swatch {
+  display: inline-block;
+  width: 14px;
+  height: 9px;
+  margin-right: 6px;
+  background: #d6eecd;
+  border: 1px solid var(--atr-accent-dark);
+  vertical-align: middle;
+}
+
+.srilanka-map-panel__credit {
+  margin: 10px 0 0;
+  font-size: 0.62rem;
+  letter-spacing: 0.02em;
+  color: #8695a7;
+}
+
+.srilanka-map-panel__credit a {
+  color: #6b7d92;
+  text-decoration: underline;
+}
+
+@media (max-width: 1024px) {
+  .srilanka-map-panel {
+    position: static;
+    top: auto;
+  }
+
+  .srilanka-svg {
+    max-height: 470px;
+  }
+}
+
+@media (max-width: 580px) {
+  .srilanka-svg {
+    max-height: 400px;
+  }
+
+  .map-city-label {
+    font-size: 7px;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   18. Floating scroll-to-top control
+   -------------------------------------------------------------------------- */
+
+.scroll-top {
+  position: fixed;
+  right: 22px;
+  bottom: 22px;
+  z-index: 300;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1px;
+  width: 52px;
+  height: 52px;
+  padding: 0;
+  border: 1px solid var(--atr-navy);
+  border-radius: 2px;
+  background: var(--atr-navy);
+  color: #fff;
+  cursor: pointer;
+  box-shadow: 0 12px 26px rgba(0, 19, 48, 0.28);
+  opacity: 0;
+  transform: translateY(14px) scale(0.94);
+  transition: opacity 0.24s var(--atr-ease), transform 0.24s var(--atr-ease),
+    background-color 0.2s var(--atr-ease), border-color 0.2s var(--atr-ease), color 0.2s var(--atr-ease);
+}
+
+.scroll-top[hidden] {
+  display: none;
+}
+
+.scroll-top.is-visible {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+.scroll-top:hover,
+.scroll-top:focus-visible {
+  background: var(--atr-accent);
+  border-color: var(--atr-accent);
+  color: var(--atr-accent-ink);
+  transform: translateY(-2px) scale(1);
+}
+
+.scroll-top:active {
+  transform: translateY(0) scale(0.97);
+}
+
+.scroll-top svg:first-child {
+  width: 19px;
+  height: 19px;
+  transition: transform 0.2s var(--atr-ease);
+}
+
+.scroll-top:hover svg:first-child,
+.scroll-top:focus-visible svg:first-child {
+  transform: translateY(-2px);
+}
+
+.scroll-top__label {
+  font-family: var(--font-mono);
+  font-size: 0.52rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  line-height: 1;
+}
+
+/* Circular reading-progress ring drawn around the button */
+.scroll-top__ring {
+  position: absolute;
+  inset: -5px;
+  width: calc(100% + 10px);
+  height: calc(100% + 10px);
+  transform: rotate(-90deg);
+  pointer-events: none;
+}
+
+.scroll-top__ring-track,
+.scroll-top__ring-progress {
+  fill: none;
+  stroke-width: 2;
+}
+
+.scroll-top__ring-track {
+  stroke: rgba(0, 19, 48, 0.14);
+}
+
+.scroll-top__ring-progress {
+  stroke: var(--atr-accent);
+  stroke-linecap: round;
+  stroke-dasharray: 125.66;
+  stroke-dashoffset: 125.66;
+  transition: stroke-dashoffset 0.12s linear, stroke 0.2s var(--atr-ease);
+}
+
+.scroll-top:hover .scroll-top__ring-progress,
+.scroll-top:focus-visible .scroll-top__ring-progress {
+  stroke: var(--atr-navy);
+}
+
+@media (max-width: 760px) {
+  .scroll-top {
+    right: 14px;
+    bottom: 14px;
+    width: 46px;
+    height: 46px;
+  }
+
+  .scroll-top__label {
+    display: none;
+  }
+}
+
+@media print {
+  .scroll-top {
+    display: none !important;
   }
 }

@@ -173,7 +173,17 @@ require_once __DIR__ . '/includes/header.php';
           $initials = substr($initials, 0, 2);
       ?>
         <article class="director-card">
-          <div class="director-card__avatar" aria-hidden="true"><?= e($initials) ?></div>
+          <figure class="director-card__figure">
+            <img
+              class="director-card__photo"
+              src="<?= e($director['photo']) ?>"
+              alt="Placeholder portrait for <?= e($director['name']) ?>, <?= e($director['role']) ?> — official photograph to follow"
+              width="640"
+              height="800"
+              loading="lazy"
+            >
+            <figcaption class="director-card__pending">Photo pending</figcaption>
+          </figure>
           <div class="director-card__body">
             <span class="director-card__role"><?= e($director['role']) ?></span>
             <h3><?= e($director['name']) ?></h3>
@@ -189,6 +199,14 @@ require_once __DIR__ . '/includes/header.php';
       <div class="management-grid">
         <?php foreach ($leadership['management'] as $mgr): ?>
           <div class="mgr-item">
+            <img
+              class="mgr-item__photo"
+              src="<?= e($mgr['photo']) ?>"
+              alt="Placeholder portrait for <?= e($mgr['name']) ?>, <?= e($mgr['role']) ?> — official photograph to follow"
+              width="640"
+              height="800"
+              loading="lazy"
+            >
             <span class="mgr-item__dept"><?= e($mgr['dept']) ?></span>
             <strong class="mgr-item__name"><?= e($mgr['name']) ?></strong>
             <span class="mgr-item__role"><?= e($mgr['role']) ?></span>

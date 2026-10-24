@@ -521,10 +521,19 @@ require_once __DIR__ . '/includes/header.php';
           data-role="<?= e($director['role']) ?>"
           data-email="<?= e($director['email']) ?>"
           data-init="<?= e($initials) ?>"
+          data-photo="<?= e($director['photo']) ?>"
           aria-haspopup="dialog"
         >
           <span class="atr-member__portrait">
-            <span class="atr-member__monogram" aria-hidden="true"><?= e($initials) ?></span>
+            <img
+              class="atr-member__photo"
+              src="<?= e($director['photo']) ?>"
+              alt="Placeholder portrait for <?= e($director['name']) ?>, <?= e($director['role']) ?> — official photograph to follow"
+              width="640"
+              height="800"
+              loading="lazy"
+            >
+            <span class="atr-member__tag">Photo pending</span>
             <span class="atr-member__zoom" aria-hidden="true">
               <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5M11 8.5v5M8.5 11h5"/></svg>
             </span>
@@ -812,6 +821,7 @@ require_once __DIR__ . '/includes/header.php';
 <div class="atr-modal" id="atr-member-modal" role="dialog" aria-modal="true" aria-labelledby="atr-member-name" hidden>
   <div class="atr-modal__card">
     <button type="button" class="atr-modal__close" data-member-close aria-label="Close director profile">&times;</button>
+    <img class="atr-modal__photo" src="" alt="" width="640" height="800" data-member-photo hidden>
     <span class="atr-modal__role" data-member-role></span>
     <h3 class="atr-modal__name" id="atr-member-name" data-member-name></h3>
     <p class="atr-modal__bio" data-member-bio></p>
