@@ -596,15 +596,215 @@
     recalculateMpos();
   }
 
-  /* 6. Interactive Branch Explorer & Sri Lanka SVG Network Map (branches.php) */
+  /* 6. Interactive Branch Explorer & Sri Lanka SVG Network Map (branches.php)
+   * The map plots every office, showroom and group store. Hovering or focusing
+   * a marker (or its row in the numbered key) previews the real record — the
+   * preview is read from the already-rendered card/table row so it is
+   * translated along with the rest of the page. */
   const branchCards = Array.from(document.querySelectorAll('.branch-card'));
   const provincePills = document.querySelectorAll('[data-province-filter]');
   const searchInput = document.getElementById('branch-search-input');
   const openOnlyCheckbox = document.getElementById('branch-open-only');
   const emptyState = document.getElementById('branch-empty-state');
-  const mapPins = document.querySelectorAll('.map-pin');
+  const mapPins = Array.from(document.querySelectorAll('.map-pin'));
+  const mapKeyBtns = Array.from(document.querySelectorAll('.map-key__btn'));
+  const mapKeyItems = Array.from(document.querySelectorAll('.map-key__item'));
+  const mapTooltip = document.getElementById('map-tooltip');
+  const extendedRows = Array.from(document.querySelectorAll('tr[data-extended-location]'));
 
-  if (branchCards.length > 0) {
+  const pinFor = (id) => mapPins.find((pin) => pin.getAttribute('data-target-location') === id);
+
+  const recordFor = (pin) => {
+    const anchorId = pin.getAttribute('data-anchor');
+    const kind = pin.getAttribute('data-anchor-kind');
+    const target = anchorId ? document.getElementById(anchorId) : null;
+    const record = {
+      number: pin.getAttribute('data-number') || '',
+      name: '',
+      type: '',
+      meta: '',
+    };
+
+    if (target && kind === 'card') {
+      const nameEl = target.querySelector('h2');
+      const addressEl = target.querySelector('.branch-card__address');
+      const phoneEl = target.querySelector('.phone-links a');
+      const badgeEl = target.querySelector('.branch-card__badge');
+      record.name = nameEl ? nameEl.textContent.trim() : '';
+      record.type = badgeEl ? badgeEl.textContent.trim() : '';
+      record.meta = [addressEl ? addressEl.textContent.replace(/\s+/g, ' ').trim() : '', phoneEl ? phoneEl.textContent.trim() : '']
+        .filter(Boolean)
+        .join(' · ');
+    } else if (target && kind === 'row') {
+      const cells = target.querySelectorAll('td');
+      record.name = cells[0] ? cells[0].textContent.trim() : '';
+      record.meta = [
+        cells[1] ? cells[1].textContent.trim() : '',
+        cells[2] ? cells[2].textContent.trim() : '',
+      ].filter(Boolean).join(' · ');
+      const item = mapKeyItems[Number(record.number) - 1];
+      const typeEl = item ? item.querySelector('.map-key__type') : null;
+      record.type = typeEl ? typeEl.textContent.trim() : '';
+    }
+
+    return record;
+  };
+
+  const showTooltip = (pin) => {
+    if (!mapTooltip) return;
+    const record = recordFor(pin);
+    if (!record.name) return;
+    const indexEl = mapTooltip.querySelector('.map-tooltip__index');
+    const nameEl = mapTooltip.querySelector('.map-tooltip__name');
+    const typeEl = mapTooltip.querySelector('.map-tooltip__type');
+    const metaEl = mapTooltip.querySelector('.map-tooltip__meta');
+    if (indexEl) indexEl.textContent = '#' + record.number;
+    if (nameEl) nameEl.textContent = record.name;
+    if (typeEl) typeEl.textContent = record.type;
+    if (metaEl) metaEl.textContent = record.meta;
+    mapTooltip.hidden = false;
+    positionTooltip(pin);
+  };
+
+  /** Float the preview beside the marker, clamped inside the map block. */
+  const positionTooltip = (pin) => {
+    const host = mapTooltip.parentElement;
+    const marker = pin.querySelector('.map-pin__core');
+    if (!host || !marker) return;
+    const hostBox = host.getBoundingClientRect();
+    const markerBox = marker.getBoundingClientRect();
+    const tipBox = mapTooltip.getBoundingClientRect();
+    const gap = 16;
+
+    let left = markerBox.left - hostBox.left + markerBox.width / 2 - tipBox.width / 2;
+    left = Math.max(8, Math.min(left, hostBox.width - tipBox.width - 8));
+
+    let top = markerBox.top - hostBox.top - tipBox.height - gap;
+    if (top < 8) {
+      top = markerBox.bottom - hostBox.top + gap;
+    }
+    top = Math.max(8, Math.min(top, hostBox.height - tipBox.height - 8));
+
+    mapTooltip.style.left = left + 'px';
+    mapTooltip.style.top = top + 'px';
+  };
+
+  const hideTooltip = () => {
+    if (mapTooltip) mapTooltip.hidden = true;
+  };
+
+  const clearHighlights = () => {
+    branchCards.forEach((card) => card.classList.remove('is-highlighted'));
+    extendedRows.forEach((row) => row.classList.remove('is-highlighted'));
+    mapPins.forEach((pin) => pin.classList.remove('is-selected', 'is-active'));
+    mapKeyBtns.forEach((btn) => btn.classList.remove('is-active'));
+  };
+
+  const focusLocation = (locationId) => {
+    const pin = pinFor(locationId);
+    if (!pin) return;
+    clearHighlights();
+    pin.classList.add('is-selected', 'is-active');
+    const btn = mapKeyBtns.find((b) => b.getAttribute('data-map-target') === locationId);
+    if (btn) btn.classList.add('is-active');
+    const anchorId = pin.getAttribute('data-anchor');
+    const anchor = anchorId ? document.getElementById(anchorId) : null;
+    if (anchor) {
+      anchor.classList.add('is-highlighted');
+      if (anchor.classList.contains('branch-card')) {
+        anchor.hidden = false;
+      }
+    }
+  };
+
+  const scrollToLocation = (locationId) => {
+    const pin = pinFor(locationId);
+    if (!pin) return;
+    focusLocation(locationId);
+    const anchorId = pin.getAttribute('data-anchor');
+    const anchor = anchorId ? document.getElementById(anchorId) : null;
+    if (!anchor) return;
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    anchor.scrollIntoView({ behavior: reduced ? 'auto' : 'smooth', block: 'center' });
+  };
+
+  /**
+   * Pin labels are assembled on the server (number + city + type), so they can
+   * never match the dictionary. Rebuilding them from the numbered key — which
+   * is translated with the rest of the page — keeps both maps consistent.
+   */
+  const syncMapPinLabels = () => {
+    mapPins.forEach((pin) => {
+      const id = pin.getAttribute('data-target-location');
+      const number = pin.getAttribute('data-number') || '';
+      const btn = mapKeyBtns.find((b) => b.getAttribute('data-map-target') === id);
+      if (!btn) return;
+      const cityEl = btn.querySelector('.map-key__city');
+      const typeEl = btn.querySelector('.map-key__type');
+      const city = cityEl ? cityEl.textContent.trim() : '';
+      const type = typeEl ? typeEl.textContent.trim() : '';
+      let label = number + '. ' + city + (type ? ' — ' + type : '');
+      if (pin.getAttribute('data-open') === '1') {
+        label += srT(' (open now)', ' (දැන් විවෘත)');
+      }
+      pin.setAttribute('aria-label', label);
+    });
+  };
+
+  syncMapPinLabels();
+  document.addEventListener('softrings:language', syncMapPinLabels);
+
+  mapPins.forEach((pin) => {
+    const id = pin.getAttribute('data-target-location');
+    pin.addEventListener('mouseenter', () => {
+      focusLocation(id);
+      showTooltip(pin);
+    });
+    pin.addEventListener('mouseleave', () => {
+      hideTooltip();
+    });
+    pin.addEventListener('focus', () => {
+      focusLocation(id);
+      showTooltip(pin);
+    });
+    pin.addEventListener('blur', hideTooltip);
+    pin.addEventListener('click', () => scrollToLocation(id));
+    pin.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        scrollToLocation(id);
+      }
+    });
+  });
+
+  mapKeyBtns.forEach((btn) => {
+    const id = btn.getAttribute('data-map-target');
+    btn.addEventListener('mouseenter', () => focusLocation(id));
+    btn.addEventListener('focus', () => focusLocation(id));
+    btn.addEventListener('click', () => scrollToLocation(id));
+  });
+
+  branchCards.forEach((card) => {
+    card.addEventListener('mouseenter', () => {
+      clearHighlights();
+      card.classList.add('is-highlighted');
+      mapPins.forEach((pin) => {
+        if (pin.getAttribute('data-anchor') === card.id) pin.classList.add('is-selected');
+      });
+    });
+  });
+
+  extendedRows.forEach((row) => {
+    row.addEventListener('mouseenter', () => {
+      clearHighlights();
+      row.classList.add('is-highlighted');
+      mapPins.forEach((pin) => {
+        if (pin.getAttribute('data-anchor') === row.id) pin.classList.add('is-selected');
+      });
+    });
+  });
+
+  if (mapPins.length > 0 || branchCards.length > 0) {
     let activeProvince = 'all';
 
     const applyBranchFilters = () => {
@@ -614,16 +814,74 @@
 
       branchCards.forEach((card) => {
         const matchesProvince = activeProvince === 'all' || card.dataset.province === activeProvince;
-        const matchesQuery = !q || (card.dataset.search || '').includes(q);
+        const matchesQuery = !q || (card.dataset.search || '').includes(q)
+          || (card.textContent || '').toLowerCase().includes(q);
         const matchesOpen = !openOnly || card.dataset.open === '1';
         const show = matchesProvince && matchesQuery && matchesOpen;
         card.hidden = !show;
         if (show) visibleCount++;
       });
 
+      // The map mirrors the same filters: non-matching markers fade instead of
+      // vanishing so the shape of the network stays readable.
+      const matches = (el) => {
+        const province = el.getAttribute('data-province') || '';
+        // English index first, then whatever the visitor currently sees, so a
+        // Sinhala place name finds its marker as readily as the English one.
+        const search = (el.getAttribute('data-search') || '').toLowerCase();
+        const spoken = (el.getAttribute('aria-label') || el.textContent || '').toLowerCase();
+        const isOpen = el.getAttribute('data-open') === '1';
+        const category = el.getAttribute('data-category') || '';
+        return {
+          ok: (activeProvince === 'all' || province === activeProvince)
+            && (!q || search.includes(q) || spoken.includes(q) || category === q)
+            && (!openOnly || isOpen),
+        };
+      };
+
+      // A searched name that only lives in the extended table (Kegalle, Pettah…)
+      // must stay highlighted; everything else fades.
+      const rowMatches = extendedRows.map((row) => {
+        const city = row.querySelector('td');
+        const text = city ? city.textContent.toLowerCase() : '';
+        const province = row.getAttribute('data-province') || '';
+        // `data-search` holds the English city/road text, so searching an English
+        // name keeps working after the page has been switched to Sinhala.
+        const indexed = (row.getAttribute('data-search') || '').toLowerCase();
+        const matchesProvince = activeProvince === 'all' || province === activeProvince;
+        const matchesQuery = !q || text.includes(q) || indexed.includes(q)
+          || (row.textContent || '').toLowerCase().includes(q);
+        const isOpenStored = row.getAttribute('data-open') === '1';
+        return matchesProvince && matchesQuery && (!openOnly || isOpenStored);
+      });
+      const keepRow = new Set();
+      extendedRows.forEach((row, index) => {
+        if (rowMatches[index]) keepRow.add(row.id);
+        row.classList.toggle('is-muted', !rowMatches[index]);
+      });
+
+      mapPins.forEach((pin) => {
+        const anchorId = pin.getAttribute('data-anchor') || '';
+        pin.classList.toggle('is-muted', !matches(pin).ok && !keepRow.has(anchorId));
+      });
+
+      mapKeyItems.forEach((item) => {
+        const btn = item.querySelector('.map-key__btn');
+        if (!btn) return;
+        const ok = matches(btn).ok || keepRow.has(btn.getAttribute('data-map-target') || '');
+        item.classList.toggle('is-muted', !ok);
+      });
+
+      // A store-only match (Kegalle, Pettah…) legitimately shows no branch card,
+      // so the "no matching branches" note must only appear when nothing at all
+      // matched on the page — cards, map markers, legend entries or store rows.
+      const anyLocationMatch = keepRow.size > 0
+        || Array.prototype.some.call(mapPins, (pin) => !pin.classList.contains('is-muted'))
+        || Array.prototype.some.call(mapKeyItems, (item) => !item.classList.contains('is-muted'));
       if (emptyState) {
-        emptyState.hidden = visibleCount > 0;
+        emptyState.hidden = visibleCount > 0 || anyLocationMatch;
       }
+
     };
 
     provincePills.forEach((pill) => {
@@ -637,32 +895,7 @@
     if (searchInput) searchInput.addEventListener('input', applyBranchFilters);
     if (openOnlyCheckbox) openOnlyCheckbox.addEventListener('change', applyBranchFilters);
 
-    const highlightBranch = (branchId, scrollIntoView = false) => {
-      branchCards.forEach((c) => c.classList.toggle('is-highlighted', c.id === branchId));
-      mapPins.forEach((p) => p.classList.toggle('is-selected', p.getAttribute('data-target-branch') === branchId));
-      if (scrollIntoView) {
-        const target = document.getElementById(branchId);
-        if (target) {
-          target.hidden = false;
-          target.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }
-      }
-    };
-
-    mapPins.forEach((pin) => {
-      const targetId = pin.getAttribute('data-target-branch');
-      pin.addEventListener('click', () => highlightBranch(targetId, true));
-      pin.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault();
-          highlightBranch(targetId, true);
-        }
-      });
-    });
-
-    branchCards.forEach((card) => {
-      card.addEventListener('mouseenter', () => highlightBranch(card.id, false));
-    });
+    applyBranchFilters();
   }
 
   /* 7. Career Role Quick-Select & Dual-Mode Forms (PHP Server + GitHub Pages Static Fallback) */

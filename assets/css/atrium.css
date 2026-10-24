@@ -3695,3 +3695,459 @@ html[data-lang='si'] .branch-card {
     line-height: 1.4;
   }
 }
+
+/* --------------------------------------------------------------------------
+   20. Full network map — every office, showroom and group store
+   The map moved out of the sticky sidebar so all fifteen locations fit at a
+   readable size; the numbered key beside it replaces in-map text labels, which
+   would collide in the Colombo–Avissawella corridor.
+   -------------------------------------------------------------------------- */
+
+.network-map {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 480px) minmax(0, 1fr);
+  gap: 28px;
+  align-items: start;
+  margin: 26px 0 38px;
+}
+
+.network-map .srilanka-map-panel {
+  position: static;
+  top: auto;
+  padding: 18px 18px 14px;
+}
+
+.srilanka-svg-wrap {
+  position: relative;
+}
+
+.network-map .srilanka-svg {
+  max-height: 820px;
+}
+
+/* --- Pin categories ------------------------------------------------------ */
+
+.map-pin {
+  cursor: pointer;
+  outline: none;
+}
+
+.map-pin__halo {
+  fill: rgba(0, 85, 171, 0.14);
+  transition: r 0.18s var(--atr-ease), fill 0.18s var(--atr-ease);
+}
+
+.map-pin__core {
+  fill: var(--atr-navy);
+  stroke: #fff;
+  stroke-width: 1.4;
+  transition: fill 0.18s var(--atr-ease);
+}
+
+.map-pin--showroom .map-pin__core {
+  fill: var(--atr-blue);
+}
+
+.map-pin--store .map-pin__core {
+  fill: #fff;
+  stroke: var(--atr-blue);
+  stroke-width: 1.6;
+}
+
+/* Green halo ring marks a location that is open in Sri Lanka Standard Time. */
+.map-pin.is-open .map-pin__halo {
+  fill: rgba(58, 194, 42, 0.3);
+  stroke: var(--atr-accent);
+  stroke-width: 1.6;
+}
+
+.map-pin__hit {
+  fill: transparent;
+  pointer-events: all;
+}
+
+.map-pin__num {
+  font-family: var(--font-mono);
+  font-size: 7.4px;
+  font-weight: 700;
+  fill: var(--atr-navy);
+  paint-order: stroke;
+  stroke: #ffffff;
+  stroke-width: 2.2px;
+  stroke-linejoin: round;
+  pointer-events: none;
+  user-select: none;
+}
+
+.map-pin__leader {
+  stroke: rgba(0, 85, 171, 0.45);
+  stroke-width: 0.7;
+  stroke-dasharray: 1.6 1.6;
+  pointer-events: none;
+}
+
+.map-pin__origin {
+  fill: rgba(0, 85, 171, 0.5);
+  pointer-events: none;
+}
+
+.map-pin:hover .map-pin__halo,
+.map-pin:focus-visible .map-pin__halo,
+.map-pin.is-selected .map-pin__halo,
+.map-pin.is-active .map-pin__halo {
+  fill: rgba(58, 194, 42, 0.42);
+  r: 14px;
+}
+
+.map-pin:hover .map-pin__core,
+.map-pin:focus-visible .map-pin__core,
+.map-pin.is-selected .map-pin__core,
+.map-pin.is-active .map-pin__core {
+  fill: var(--atr-accent-dark);
+  stroke: var(--atr-navy);
+}
+
+.map-pin:focus-visible .map-pin__halo {
+  stroke: var(--atr-navy);
+  stroke-width: 1.2;
+}
+
+/* Filtered-out locations fade back instead of disappearing, so the network
+   still reads as a whole. */
+.map-pin.is-muted {
+  opacity: 0.22;
+  pointer-events: none;
+}
+
+.map-pin.is-muted .map-pin__num {
+  opacity: 0;
+}
+
+/* --- Hover / focus preview card ----------------------------------------- */
+
+/* Positioned beside the hovered marker by main.js (section 6). */
+.map-tooltip {
+  position: absolute;
+  z-index: 20;
+  left: 0;
+  top: 0;
+  width: min(280px, calc(100% - 24px));
+  padding: 12px 14px;
+  border: 1px solid var(--atr-line);
+  border-left: 3px solid var(--atr-accent);
+  background: #fff;
+  box-shadow: 0 16px 36px rgba(0, 30, 70, 0.18);
+  display: grid;
+  gap: 2px;
+  pointer-events: none;
+}
+
+.map-tooltip[hidden] {
+  display: none;
+}
+
+.map-tooltip__index {
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--atr-accent-dark);
+}
+
+.map-tooltip__name {
+  font-size: 0.92rem;
+  line-height: 1.35;
+  color: var(--atr-navy);
+}
+
+.map-tooltip__type,
+.map-tooltip__meta {
+  font-size: 0.76rem;
+  line-height: 1.45;
+  color: var(--atr-muted);
+}
+
+.map-tooltip__hint {
+  margin-top: 4px;
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--atr-blue);
+}
+
+/* --- Key: legend + numbered index --------------------------------------- */
+
+.map-key {
+  display: grid;
+  gap: 18px;
+  align-content: start;
+  padding: 20px;
+  border: 1px solid var(--atr-line);
+  background: #fff;
+}
+
+.map-key__legend {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px 14px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--atr-line);
+  font-size: 0.76rem;
+  color: #46556b;
+}
+
+.map-key__legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.map-key__marker {
+  width: 11px;
+  height: 11px;
+  flex: 0 0 11px;
+  border-radius: 50%;
+  border: 1.5px solid #fff;
+  box-shadow: 0 0 0 1px rgba(0, 46, 135, 0.22);
+}
+
+.map-key__marker--office {
+  border-radius: 2px;
+  background: var(--atr-navy);
+}
+
+.map-key__marker--showroom {
+  background: var(--atr-blue);
+}
+
+.map-key__marker--store {
+  background: #fff;
+  border-color: var(--atr-blue);
+  box-shadow: 0 0 0 1px rgba(0, 85, 171, 0.4);
+}
+
+.map-key__marker--open {
+  background: rgba(58, 194, 42, 0.4);
+  border-color: var(--atr-accent);
+  box-shadow: 0 0 0 1px var(--atr-accent);
+}
+
+.map-key__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 4px 18px;
+}
+
+.map-key__btn {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: 100%;
+  padding: 6px 8px;
+  border: 1px solid transparent;
+  background: none;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 0.16s var(--atr-ease), border-color 0.16s var(--atr-ease);
+}
+
+.map-key__btn:hover,
+.map-key__btn:focus-visible,
+.map-key__btn.is-active {
+  background: var(--atr-tint);
+  border-color: var(--atr-line);
+  outline: none;
+}
+
+.map-key__num {
+  flex: 0 0 22px;
+  height: 22px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--atr-navy);
+  color: #fff;
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  font-weight: 700;
+}
+
+.map-key__item[data-category='showroom'] .map-key__num {
+  background: var(--atr-blue);
+}
+
+.map-key__item[data-category='store'] .map-key__num {
+  background: #fff;
+  color: var(--atr-blue);
+  box-shadow: inset 0 0 0 1.5px var(--atr-blue);
+}
+
+.map-key__text {
+  display: grid;
+  min-width: 0;
+}
+
+.map-key__city {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--atr-navy);
+  line-height: 1.3;
+}
+
+.map-key__type {
+  font-size: 0.68rem;
+  letter-spacing: 0.04em;
+  color: var(--atr-muted);
+}
+
+.map-key__item.is-muted {
+  opacity: 0.4;
+}
+
+/* --- Cards now run full width below the map ----------------------------- */
+
+.branch-explorer--cards {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 24px;
+  align-items: start;
+}
+
+.branch-explorer--cards .branch-cards-list {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 24px;
+  align-items: start;
+}
+
+.branch-explorer--cards #branch-empty-state {
+  grid-column: 1 / -1;
+}
+
+/* Selected map location lights up its card or extended-network row. */
+.branch-card.is-highlighted {
+  border-color: var(--atr-accent);
+  box-shadow: 0 0 0 3px rgba(58, 194, 42, 0.18);
+}
+
+tr[data-extended-location].is-highlighted {
+  background: rgba(58, 194, 42, 0.12);
+  outline: 2px solid var(--atr-accent);
+  outline-offset: -2px;
+}
+
+@media (max-width: 1080px) {
+  .network-map {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .map-key__list {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 760px) {
+  .map-key__legend,
+  .map-key__list,
+  .branch-explorer--cards .branch-cards-list {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .map-key__legend {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .network-map .srilanka-svg {
+    max-height: 560px;
+  }
+
+  /* Phone-sized numerals stay legible and every marker gets a finger-sized
+     invisible hit area, so the tightly packed Colombo cluster is still tappable. */
+  .map-pin__num {
+    font-size: 9.4px;
+    stroke-width: 2.8px;
+  }
+
+  .map-pin__hit {
+    r: 15;
+  }
+
+  .map-tooltip {
+    bottom: 8px;
+  }
+}
+
+/* --- Zoomed western-corridor detail ------------------------------------- */
+
+.network-map {
+  grid-template-columns: minmax(0, 480px) minmax(0, 1fr);
+  grid-template-areas:
+    'national detail'
+    'national key';
+  row-gap: 18px;
+}
+
+.network-map .srilanka-map-panel {
+  grid-area: national;
+  align-self: start;
+}
+
+.map-detail {
+  grid-area: detail;
+  border: 1px solid var(--atr-line);
+  background: #fff;
+  padding: 16px 16px 10px;
+}
+
+.map-detail__canvas {
+  margin-top: 8px;
+}
+
+.map-detail__svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 420px;
+}
+
+.map-detail__road {
+  fill: none;
+  stroke: rgba(0, 85, 171, 0.28);
+  stroke-width: 6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.map-detail__road-label {
+  font-family: var(--font-mono);
+  font-size: 8px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  fill: #7c8ea3;
+}
+
+.map-pin--detail .map-pin__num {
+  font-size: 8px;
+  stroke-width: 2.6px;
+}
+
+.map-key {
+  grid-area: key;
+}
+
+@media (max-width: 1080px) {
+  .network-map {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      'national'
+      'detail'
+      'key';
+  }
+}
