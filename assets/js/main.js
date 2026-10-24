@@ -218,16 +218,26 @@
             card.dataset.open = st.isOpen ? '1' : '0';
           }
 
-          const mapPin = document.querySelector(`.map-pin[data-target-branch="${sched.id}"]`);
-          if (mapPin) {
-            mapPin.classList.toggle('is-open', st.isOpen);
-          }
+          // The same location can appear on the national map, the corridor map
+          // and the key, so refresh every copy — not just the first one.
+          document.querySelectorAll(`.map-pin[data-target-location="${sched.id}"]`).forEach((pin) => {
+            pin.classList.toggle('is-open', st.isOpen);
+            pin.setAttribute('data-open', st.isOpen ? '1' : '0');
+          });
+          document.querySelectorAll(`.map-key__btn[data-map-target="${sched.id}"]`).forEach((btn) => {
+            btn.setAttribute('data-open', st.isOpen ? '1' : '0');
+            const item = btn.closest('.map-key__item');
+            if (item) item.classList.toggle('is-open', st.isOpen);
+          });
         });
 
         if (liveBadge) {
           liveBadge.classList.toggle('is-open', openCount > 0);
           liveBadge.classList.toggle('is-standby', openCount === 0);
         }
+        // Let the map section re-evaluate its filters against the new statuses.
+        document.dispatchEvent(new CustomEvent('softrings:telemetry'));
+
         if (utilitySummary) {
           utilitySummary.innerHTML = openCount > 0
             ? srT(
@@ -894,6 +904,13 @@
 
     if (searchInput) searchInput.addEventListener('input', applyBranchFilters);
     if (openOnlyCheckbox) openOnlyCheckbox.addEventListener('change', applyBranchFilters);
+
+    // Statuses refresh every 30 seconds; labels and the "open now" filter have
+    // to follow them without a page reload.
+    document.addEventListener('softrings:telemetry', () => {
+      syncMapPinLabels();
+      applyBranchFilters();
+    });
 
     applyBranchFilters();
   }
