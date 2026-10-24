@@ -209,13 +209,13 @@ require_once __DIR__ . '/includes/header.php';
 <!-- Extended Distribution & Satellite Network -->
 <section class="section section--ivory">
   <div class="container">
-    <div class="section-header-narrow">
-      <span class="eyebrow">Extended Territory Network</span>
-      <h2 class="section-title">Additional Group Touchpoints &amp; Distribution Corridors</h2>
-      <p class="prose-text">
+    <header class="atr-head">
+      <span class="atr-kicker">Extended Territory Network</span>
+      <h2 class="atr-heading">Additional Group Touchpoints &amp; Distribution Corridors</h2>
+      <p class="atr-sub">
         Alongside our 8 primary corporate and flagship centers, the Softrings Group has established wholesale distribution and retail touchpoints across Greater Colombo, Sabaragamuwa, and the Central Highlands.
       </p>
-    </div>
+    </header>
 
     <div class="table-responsive">
       <table class="corporate-table">

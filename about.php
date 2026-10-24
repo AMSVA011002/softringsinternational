@@ -87,13 +87,13 @@ require_once __DIR__ . '/includes/header.php';
 <!-- Group Structure Table / Matrix -->
 <section class="section section--ivory" id="group-structure">
   <div class="container">
-    <div class="section-header-narrow">
-      <span class="eyebrow">Conglomerate Architecture</span>
-      <h2 class="section-title">The Softrings Group of Companies</h2>
-      <p class="prose-text">
+    <header class="atr-head">
+      <span class="atr-kicker">Conglomerate Architecture</span>
+      <h2 class="atr-heading">The Softrings Group of Companies</h2>
+      <p class="atr-sub">
         Over the past quarter-century, Softrings structured specialized private limited companies in Sri Lanka to align dedicated operational teams with national telecom carriers, global handset manufacturers, and regional retail territories.
       </p>
-    </div>
+    </header>
 
     <div class="table-responsive">
       <table class="corporate-table">
@@ -131,10 +131,10 @@ require_once __DIR__ . '/includes/header.php';
 <!-- Detailed Historical Timeline -->
 <section class="section section--white" id="timeline">
   <div class="container">
-    <div class="section-header-narrow">
-      <span class="eyebrow">Chronicle</span>
-      <h2 class="section-title">26 Years of Telecommunications Milestones</h2>
-    </div>
+    <header class="atr-head">
+      <span class="atr-kicker">Chronicle</span>
+      <h2 class="atr-heading">26 Years of Telecommunications Milestones</h2>
+    </header>
 
     <div class="vertical-timeline">
       <?php foreach ($timeline as $item): ?>
@@ -154,13 +154,13 @@ require_once __DIR__ . '/includes/header.php';
 <!-- Board of Directors & Executive Leadership -->
 <section class="section section--ivory" id="leadership">
   <div class="container">
-    <div class="section-header-narrow">
-      <span class="eyebrow">Corporate Governance</span>
-      <h2 class="section-title">Board of Directors &amp; Executive Management</h2>
-      <p class="prose-text">
+    <header class="atr-head">
+      <span class="atr-kicker">Corporate Governance</span>
+      <h2 class="atr-heading">Board of Directors &amp; Executive Management</h2>
+      <p class="atr-sub">
         Guided by experienced Sri Lankan business leadership and functional department heads spanning sales distribution, human resources, finance, corporate secretarial compliance, and technical engineering.
       </p>
-    </div>
+    </header>
 
     <div class="directors-grid">
       <?php foreach ($leadership['board'] as $director):

@@ -16,7 +16,18 @@ The interface palette is taken directly from the official SLT-Mobitel stylesheet
 | Mobitel Sky | `#8CD8FF` | Highlights and links on dark surfaces |
 | Body / muted / borders | `#3A3A3A` · `#6A6A6A` · `#CCCCCC` | Copy, captions, form outlines |
 
-UI/UX refinements built on that palette: pill navigation with a green underline indicator, floating fact-ledger card over the hero, glassmorphic meta cards, gradient CTA panel, interactive map with a green-to-blue coastline, branded range sliders, unified focus rings, `prefers-reduced-motion` support, and a responsive nav that collapses at 1040px with a branded dropdown panel.
+UI/UX refinements built on that palette: tracked uppercase navigation with a green underline indicator, full-bleed hero slider, overlapping corporate stat bar, icon feature grid, filterable gallery with lightbox, team cards with profile modal, dark milestone cards, partnership plan cards, FAQ accordion, dark footer, interactive map with a green-to-blue coastline, branded range sliders, unified focus rings, `prefers-reduced-motion` support, and a responsive nav that collapses at 1040px with a branded dropdown panel.
+
+### Layout system (Atrium-derived)
+
+The page architecture follows the **QuanticaLabs "Atrium"** corporate one-page template — section order, centred uppercase headings with a 4px accent underline, an 80px section rhythm, a 1140px centred column, square uppercase buttons, and the hero → about → services → work → team → updates → plans → capabilities → FAQ → contact sequence. The template's own green/charcoal palette is **not** used: every accent resolves to the SLT-Mobitel tokens above.
+
+| Layer | File | Purpose |
+| --- | --- | --- |
+| Base components | `assets/css/style.css` | Tokens, forms, map, calculator, print dossier |
+| Atrium layout | `assets/css/atrium.css` | Headings, hero slider, gallery, team, plans, FAQ, footer |
+
+Interactive behaviour lives in `assets/js/main.js`: hero slider (6.5s auto-advance, pause on hover/focus, `inert` slides), gallery filtering, keyboard-accessible lightbox, board-member modal, and a single-open FAQ accordion.
 
 ## Key Features
 - **Authentic Sri Lankan Corporate Data:** Verified group history (Est. 2000 Group / 11 September 2009 Softrings International), subsidiaries matrix, Board of Directors & executive management, and 8 core showrooms/offices across Western and Central Provinces.
