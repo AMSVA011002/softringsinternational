@@ -23,6 +23,15 @@
     return div.innerHTML;
   };
 
+  /* ------------------------------------------------------------------------
+   * Language helpers (English / Sinhala). Available to every module below so
+   * strings rendered after the initial translation pass stay in the chosen
+   * language instead of snapping back to English.
+   * ---------------------------------------------------------------------- */
+  const srLang = () => (document.documentElement.getAttribute('data-lang') === 'si' ? 'si' : 'en');
+  const srT = (en, si) => (srLang() === 'si' ? si : en);
+  window.SR = { lang: srLang, t: srT };
+
   const readLocalLedger = () => {
     try {
       const raw = localStorage.getItem(STATIC_LEDGER_KEY);
@@ -151,14 +160,37 @@
     } catch (_) {}
   }
 
+  const WEEKDAY_SI = {
+    Monday: 'සඳුදා', Tuesday: 'අඟහරුවාදා', Wednesday: 'බදාදා', Thursday: 'බ්‍රහස්පතින්දා',
+    Friday: 'සිකුරාදා', Saturday: 'සෙනසුරාදා', Sunday: 'ඉරිදා',
+  };
+
+  /* Time-dependent status labels are built in JS, so they cannot come from the
+     static dictionary — translate them here instead. */
+  const srBranchStatus = (label) => {
+    if (srLang() !== 'si' || !label) return label;
+    if (label.indexOf('Open Now · Closes ') === 0) {
+      return 'දැන් විවෘතයි · වැසෙන්නේ ' + label.replace('Open Now · Closes ', '');
+    }
+    if (label.indexOf('Opens Today at ') === 0) {
+      return 'අද විවෘත වන්නේ ' + label.replace('Opens Today at ', '');
+    }
+    if (label.indexOf('Closed Today') === 0) return 'අද දිනට වසා ඇත';
+    if (label.indexOf('Closed for Today') === 0) return 'අද දිනට වසා ඇත';
+    return label;
+  };
+
   const refreshColomboTelemetry = () => {
     try {
       const colombo = getColomboNowParts();
       if (slstClock) {
-        slstClock.textContent = `Colombo ${colombo.display12} SLST`;
+        slstClock.textContent = srT(`Colombo ${colombo.display12} SLST`, `කොළඹ ${colombo.display12} SLST`);
       }
       if (branchesLocalTime) {
-        branchesLocalTime.textContent = `${colombo.weekdayName}, ${colombo.display12}`;
+        branchesLocalTime.textContent = srT(
+          `${colombo.weekdayName}, ${colombo.display12}`,
+          `${WEEKDAY_SI[colombo.weekdayName] || colombo.weekdayName}, ${colombo.display12}`
+        );
       }
 
       if (parsedSchedules.length > 0) {
@@ -169,14 +201,14 @@
 
           const miniPill = document.querySelector(`[data-mini-status="${sched.id}"]`);
           if (miniPill) {
-            miniPill.textContent = st.isOpen ? 'Open' : 'Closed';
+            miniPill.textContent = st.isOpen ? srT('Open', 'විවෘත') : srT('Closed', 'වසා ඇත');
             miniPill.classList.toggle('is-open', st.isOpen);
             miniPill.classList.toggle('is-closed', !st.isOpen);
           }
 
           const fullPill = document.querySelector(`[data-full-status="${sched.id}"]`);
           if (fullPill) {
-            fullPill.textContent = st.label;
+            fullPill.textContent = srBranchStatus(st.label);
             fullPill.classList.toggle('is-open', st.isOpen);
             fullPill.classList.toggle('is-closed', !st.isOpen);
           }
@@ -198,8 +230,14 @@
         }
         if (utilitySummary) {
           utilitySummary.innerHTML = openCount > 0
-            ? `<strong>${openCount} of ${parsedSchedules.length}</strong> Regional Hubs Open Now`
-            : 'Standard Hours Resume 8:00 AM SLST · Digital Inquiry Desk Active';
+            ? srT(
+              `<strong>${openCount} of ${parsedSchedules.length}</strong> Regional Hubs Open Now`,
+              `<strong>මධ්‍යස්ථාන ${parsedSchedules.length} න් ${openCount} ක්</strong> දැන් විවෘතයි`
+            )
+            : srT(
+              'Standard Hours Resume 8:00 AM SLST · Digital Inquiry Desk Active',
+              'සාමාන්‍ය සේවා වේලාවන් 8:00 AM SLST සිට · ඩිජිටල් විමසුම් කවුළුව ක්‍රියාත්මකයි'
+            );
         }
       }
     } catch (_) {
@@ -210,47 +248,190 @@
   refreshColomboTelemetry();
   setInterval(refreshColomboTelemetry, 30000);
 
-  /* 3. Trilingual Identity Ribbon Switcher (EN / සිං / தமிழ்) */
+  /* 3. Full-site language engine — English / Sinhala
+   * ---------------------------------------------------------------------
+   * Every visible string on the page is translated, not just the identity
+   * ribbon. Three passes are layered so the markup keeps working:
+   *   a) element templates — blocks whose sentence is split by <a>/<strong>
+   *      are matched with {0}, {1}… slots so Sinhala word order can move the
+   *      link without touching the DOM structure;
+   *   b) text nodes — plain strings looked up by their trimmed content;
+   *   c) attributes — placeholder, aria-label, title and alt.
+   * Switching back to English restores the captured originals, so nothing
+   * drifts after repeated toggles.
+   * ------------------------------------------------------------------- */
+  const SI_DICT = window.SR_I18N_SI || {};
+  const LANG_KEY = 'softrings_lang';
   const langButtons = document.querySelectorAll('[data-lang-switch]');
-  const ribbonMotto = document.getElementById('ribbon-motto');
-  const ribbonBadge = document.getElementById('ribbon-badge');
-  const brandCorpName = document.getElementById('brand-corp-name');
-
-  const applyLanguage = (btn) => {
-    if (!btn) return;
-    const code = btn.getAttribute('data-lang-switch') || 'en';
-    langButtons.forEach((b) => {
-      const active = b === btn;
-      b.classList.toggle('is-active', active);
-      b.setAttribute('aria-pressed', String(active));
-    });
-    if (ribbonMotto && btn.dataset.motto) {
-      ribbonMotto.textContent = btn.dataset.motto;
-    }
-    if (ribbonBadge && btn.dataset.badge) {
-      ribbonBadge.textContent = btn.dataset.badge;
-    }
-    if (brandCorpName && btn.dataset.corpName) {
-      brandCorpName.textContent = code === 'en' ? 'Softrings International' : btn.dataset.corpName;
-    }
-    document.documentElement.setAttribute('data-lang', code);
-    try {
-      localStorage.setItem('softrings_lang', code);
-    } catch (_) {}
+  const textStore = new Map();
+  const attrStore = new Map();
+  const tplStore = new WeakMap();
+  const SKIP_TAGS = /^(SCRIPT|STYLE|NOSCRIPT|TEMPLATE|SVG|PATH|CIRCLE|RECT|TEXT|G|DEFS|LINEARGRADIENT|STOP)$/;
+  const norm = (value) => String(value).replace(/\s+/g, ' ').trim();
+  const metaDescription = document.querySelector('meta[name="description"]');
+  const metaStore = {
+    title: document.title,
+    description: metaDescription ? metaDescription.getAttribute('content') || '' : '',
+    titleSi: null,
+    descriptionSi: null,
   };
 
-  if (langButtons.length > 0) {
-    langButtons.forEach((btn) => {
-      btn.addEventListener('click', () => applyLanguage(btn));
-    });
-    try {
-      const saved = localStorage.getItem('softrings_lang');
-      if (saved) {
-        const match = document.querySelector(`[data-lang-switch="${saved}"]`);
-        if (match) applyLanguage(match);
+  const isSkipped = (el) => Boolean(el && el.closest && el.closest('[data-i18n-skip]'));
+
+  const templateRecord = (el) => {
+    let rec = tplStore.get(el);
+    if (rec) return rec;
+    const parts = [];
+    const nodes = Array.from(el.childNodes);
+    const children = [];
+    nodes.forEach((node) => {
+      if (node.nodeType === 3) {
+        parts.push(node.nodeValue);
+      } else if (node.nodeType === 1) {
+        parts.push('{' + children.length + '}');
+        children.push(node);
       }
-    } catch (_) {}
-  }
+    });
+    rec = { key: norm(parts.join('')), nodes, children, applied: false };
+    tplStore.set(el, rec);
+    return rec;
+  };
+
+  const applyTemplate = (el) => {
+    if (!el || SKIP_TAGS.test(el.tagName) || isSkipped(el)) return false;
+    const rec = templateRecord(el);
+    if (rec.applied || rec.children.length === 0) return false;
+    const translated = SI_DICT[rec.key];
+    if (!translated) return false;
+    const fragments = translated.split(/\{(\d+)\}/);
+    const frag = document.createDocumentFragment();
+    fragments.forEach((piece, index) => {
+      if (index % 2 === 1) {
+        const child = rec.children[Number(piece)];
+        if (child) frag.appendChild(child);
+      } else if (piece) {
+        frag.appendChild(document.createTextNode(piece));
+      }
+    });
+    el.replaceChildren(frag);
+    rec.applied = true;
+    return true;
+  };
+
+  const restoreTemplate = (el) => {
+    const rec = tplStore.get(el);
+    if (!rec || !rec.applied) return;
+    el.replaceChildren(...rec.nodes);
+    rec.applied = false;
+  };
+
+  const translateText = (node) => {
+    const raw = node.nodeValue;
+    if (!raw || !/[A-Za-z]/.test(raw)) return;
+    const translated = SI_DICT[norm(raw)];
+    if (!translated) return;
+    if (!textStore.has(node)) textStore.set(node, raw);
+    const lead = raw.match(/^\s*/)[0];
+    const trail = raw.match(/\s*$/)[0];
+    node.nodeValue = lead + translated + trail;
+  };
+
+  const TRANSLATABLE_ATTRS = ['placeholder', 'aria-label', 'title', 'alt'];
+  const translateAttrs = (el) => {
+    TRANSLATABLE_ATTRS.forEach((attr) => {
+      const value = el.getAttribute(attr);
+      if (!value || !/[A-Za-z]/.test(value)) return;
+      const translated = SI_DICT[norm(value)];
+      if (!translated) return;
+      let store = attrStore.get(el);
+      if (!store) {
+        store = {};
+        attrStore.set(el, store);
+      }
+      if (!(attr in store)) store[attr] = value;
+      el.setAttribute(attr, translated);
+    });
+  };
+
+  const translateInto = (root) => {
+    if (srLang() !== 'si') return;
+    const scope = root && root.nodeType === 1 ? root : document.body;
+    if (!scope) return;
+    applyTemplate(scope);
+    translateAttrs(scope);
+    if (scope.querySelectorAll) {
+      scope.querySelectorAll('*').forEach((el) => {
+        if (SKIP_TAGS.test(el.tagName) || isSkipped(el)) return;
+        applyTemplate(el);
+        translateAttrs(el);
+      });
+    }
+    const walker = document.createTreeWalker(scope, NodeFilter.SHOW_TEXT);
+    let node;
+    while ((node = walker.nextNode())) {
+      const parent = node.parentElement;
+      if (!parent || SKIP_TAGS.test(parent.tagName) || isSkipped(parent)) continue;
+      translateText(node);
+    }
+  };
+  window.SR.translate = translateInto;
+
+  const restoreOriginalLanguage = () => {
+    document.querySelectorAll('*').forEach((el) => restoreTemplate(el));
+    textStore.forEach((original, node) => {
+      node.nodeValue = original;
+    });
+    attrStore.forEach((store, el) => {
+      Object.keys(store).forEach((attr) => el.setAttribute(attr, store[attr]));
+    });
+  };
+
+  const applyMetaLanguage = (lang) => {
+    if (lang === 'si') {
+      if (metaStore.titleSi === null) metaStore.titleSi = SI_DICT[norm(metaStore.title)] || metaStore.title;
+      if (metaStore.descriptionSi === null) {
+        metaStore.descriptionSi = SI_DICT[norm(metaStore.description)] || metaStore.description;
+      }
+      document.title = metaStore.titleSi;
+      if (metaDescription) metaDescription.setAttribute('content', metaStore.descriptionSi);
+    } else {
+      document.title = metaStore.title;
+      if (metaDescription) metaDescription.setAttribute('content', metaStore.description);
+    }
+  };
+
+  const setLanguage = (code, persist) => {
+    const lang = code === 'si' ? 'si' : 'en';
+    document.documentElement.setAttribute('data-lang', lang);
+    document.documentElement.lang = lang;
+    if (lang === 'si') {
+      translateInto(document.body);
+    } else {
+      restoreOriginalLanguage();
+    }
+    applyMetaLanguage(lang);
+    langButtons.forEach((btn) => {
+      const active = btn.getAttribute('data-lang-switch') === lang;
+      btn.classList.toggle('is-active', active);
+      btn.setAttribute('aria-pressed', String(active));
+    });
+    if (persist !== false) {
+      try {
+        localStorage.setItem(LANG_KEY, lang);
+      } catch (_) {}
+    }
+    document.documentElement.classList.remove('i18n-boot');
+    if (typeof refreshColomboTelemetry === 'function') refreshColomboTelemetry();
+    document.dispatchEvent(new CustomEvent('softrings:language', { detail: { lang } }));
+  };
+  window.SR.setLanguage = setLanguage;
+
+  langButtons.forEach((btn) => {
+    btn.addEventListener('click', () => setLanguage(btn.getAttribute('data-lang-switch')));
+  });
+
+  /* Apply the remembered language once the DOM is parsed. */
+  setLanguage(srLang(), false);
 
   /* 3b. Query-String Preselection on Contact Page (Static & Dynamic Parity) */
   try {
@@ -324,11 +505,11 @@
 
   const renderRecordAlert = (rec) => `
     <div class="alert alert--success">
-      <strong>${escapeHtml(rec.record_kind || 'Record')}: ${escapeHtml(rec.ref_code)}</strong>
-      <p><strong>Applicant / Contact:</strong> ${escapeHtml(rec.full_name)}</p>
+      <strong>${escapeHtml(rec.record_kind || srT('Record', 'වාර්තාව'))}: ${escapeHtml(rec.ref_code)}</strong>
+      <p><strong>${srT('Applicant / Contact:', 'අයදුම්කරු / සම්බන්ධතාවය:')}</strong> ${escapeHtml(rec.full_name)}</p>
       <p><strong>Subject:</strong> ${escapeHtml(rec.subject || rec.inquiry_type || rec.job_title || '')}</p>
       <p><strong>Status:</strong> ${escapeHtml(rec.status)}</p>
-      <p><strong>Logged:</strong> ${escapeHtml(rec.created_at)}</p>
+      <p><strong>${srT('Logged:', 'සටහන් කළේ:')}</strong> ${escapeHtml(rec.created_at)}</p>
     </div>
   `;
 
@@ -337,7 +518,7 @@
       e.preventDefault();
       const ref = trackerInput.value.trim().toUpperCase();
       if (!ref) return;
-      trackerResult.innerHTML = '<div class="alert">Checking Softrings Corporate Desk ledger...</div>';
+      trackerResult.innerHTML = `<div class="alert">${srT('Checking Softrings Corporate Desk ledger...', 'සොෆ්ට්‍රින්ග්ස් ආයතනික විමසුම් ලේඛනය පරීක්ෂා කරමින්...')}</div>`;
 
       if (!IS_STATIC_HOST) {
         try {
@@ -355,7 +536,7 @@
                 trackerResult.innerHTML = renderRecordAlert(localRec);
                 return;
               }
-              trackerResult.innerHTML = `<div class="alert alert--error"><p>${escapeHtml((data && data.error) || 'Reference not found.')}</p></div>`;
+              trackerResult.innerHTML = `<div class="alert alert--error"><p>${escapeHtml((data && data.error) || srT('Reference not found.', 'යොමු අංකය සොයාගත නොහැක.'))}</p></div>`;
               return;
             }
           }
@@ -368,7 +549,7 @@
       if (localRec) {
         trackerResult.innerHTML = renderRecordAlert(localRec);
       } else {
-        trackerResult.innerHTML = `<div class="alert alert--error"><p>No inquiry or HR application matched reference "${escapeHtml(ref)}".</p></div>`;
+        trackerResult.innerHTML = `<div class="alert alert--error"><p>${srT('No inquiry or HR application matched reference', 'කිසිදු විමසුමක් හෝ රැකියා අයදුම්පතක් මෙම යොමු අංකයට නොගැළපේ')} "${escapeHtml(ref)}".</p></div>`;
       }
     });
   }
@@ -394,9 +575,9 @@
       const monthlySims = Number(simInput.value || 0);
       const monthlyPhones = Number(phoneInput.value || 0);
 
-      if (outReloads) outReloads.textContent = `${formatLkr(dailyReload)} / day`;
-      if (outSims) outSims.textContent = `${monthlySims} connections`;
-      if (outPhones) outPhones.textContent = `${monthlyPhones} units`;
+      if (outReloads) outReloads.textContent = srT(`${formatLkr(dailyReload)} / day`, `${formatLkr(dailyReload)} / දිනකට`);
+      if (outSims) outSims.textContent = srT(`${monthlySims} connections`, `සම්බන්ධතා ${monthlySims}`);
+      if (outPhones) outPhones.textContent = srT(`${monthlyPhones} units`, `උපාංග ${monthlyPhones}`);
 
       const mposCommission = dailyReload * 30 * 0.045;
       const simIncentive = monthlySims * 350;
@@ -501,33 +682,33 @@
 
   const validateClientPayload = (payload, isCareer) => {
     if (!payload.full_name || String(payload.full_name).trim().length < 2) {
-      return 'Please enter your full name.';
+      return srT('Please enter your full name.', 'කරුණාකර ඔබේ සම්පූර්ණ නම ඇතුළත් කරන්න.');
     }
     if (!/^[0-9+\-\s()]{7,20}$/.test(String(payload.phone || '').trim())) {
-      return 'Please provide a valid Sri Lankan or international phone number.';
+      return srT('Please provide a valid Sri Lankan or international phone number.', 'කරුණාකර වලංගු ශ්‍රී ලංකා හෝ ජාත්‍යන්තර දුරකථන අංකයක් ලබා දෙන්න.');
     }
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(payload.email || '').trim())) {
-      return 'Please provide a valid email address.';
+      return srT('Please provide a valid email address.', 'කරුණාකර වලංගු විද්‍යුත් තැපැල් ලිපිනයක් ලබා දෙන්න.');
     }
     const textBody = isCareer ? payload.summary : payload.message;
     if (!textBody || String(textBody).trim().length < 10) {
-      return 'Please include brief details (at least 10 characters).';
+      return srT('Please include brief details (at least 10 characters).', 'කරුණාකර කෙටි විස්තරයක් ඇතුළත් කරන්න (අවම අක්ෂර 10).');
     }
     return null;
   };
 
   const renderSuccessBanner = (feedback, data, fallbackMailto) => {
     const mailBtn = fallbackMailto
-      ? `<a href="${escapeHtml(fallbackMailto)}" class="btn btn--secondary btn--sm">Send Direct Copy via Email</a>`
+      ? `<a href="${escapeHtml(fallbackMailto)}" class="btn btn--secondary btn--sm">${srT('Send Direct Copy via Email', 'විද්‍යුත් තැපෑලෙන් පිටපතක් යවන්න')}</a>`
       : '';
     feedback.innerHTML = `
       <div class="alert alert--success" role="status">
-        <strong>Reference Code: ${escapeHtml(data.ref_code)}</strong>
+        <strong>${srT('Reference Code:', 'යොමු අංකය:')} ${escapeHtml(data.ref_code)}</strong>
         <p>${escapeHtml(data.message)}</p>
         <p><small>${escapeHtml(data.status)} · ${escapeHtml(data.created_at)}</small></p>
         <p style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;">
           <button type="button" class="btn btn--secondary btn--sm" data-verify-now="${escapeHtml(data.ref_code)}">
-            Verify Reference in Live Tracker
+            ${srT('Verify Reference in Live Tracker', 'සජීවී සොයාගැනීමේ පද්ධතියෙන් යොමු අංකය තහවුරු කරන්න')}
           </button>
           ${mailBtn}
         </p>
@@ -561,7 +742,7 @@
       const originalText = submitBtn ? submitBtn.textContent : '';
       if (submitBtn) {
         submitBtn.disabled = true;
-        submitBtn.textContent = 'Submitting...';
+        submitBtn.textContent = srT('Submitting...', 'යවමින්...');
       }
 
       try {
@@ -576,7 +757,7 @@
             const data = JSON.parse(text);
             if (res.ok && data && data.ok) {
               writeLocalLedger(data.ref_code, {
-                record_kind: isCareer ? 'Career Application' : 'Corporate / Dealer Inquiry',
+                record_kind: isCareer ? srT('Career Application', 'රැකියා අයදුම්පත') : srT('Corporate / Dealer Inquiry', 'ආයතනික / අලෙවි නියෝජිත විමසුම'),
                 ref_code: data.ref_code,
                 full_name: payload.full_name,
                 subject: isCareer ? payload.job_title : payload.inquiry_type,
@@ -607,8 +788,8 @@
       const year = new Date().getFullYear();
       const refCode = isCareer ? generateRefCode('HR-SFT') : generateRefCode(`SFT-${year}`);
       const statusText = isCareer
-        ? 'Logged in Portal Ledger — Ready for HR Dispatch (hr@softrings.lk)'
-        : 'Logged in Portal Ledger — Routed for Corporate Desk (international@softrings.lk)';
+        ? srT('Logged in Portal Ledger — Ready for HR Dispatch (hr@softrings.lk)', 'ද්වාර ලේඛනයේ සටහන් විය — මානව සම්පත් අංශයට යැවීමට සූදානම් (hr@softrings.lk)')
+        : srT('Logged in Portal Ledger — Routed for Corporate Desk (international@softrings.lk)', 'ද්වාර ලේඛනයේ සටහන් විය — ආයතනික අංශයට යොමු විය (international@softrings.lk)');
       const subjectLabel = isCareer ? payload.job_title : payload.inquiry_type;
 
       writeLocalLedger(refCode, {
@@ -632,8 +813,8 @@
         {
           ref_code: refCode,
           message: isCareer
-            ? 'Your candidate profile has been recorded with a verifiable HR reference code.'
-            : 'Your corporate inquiry has been recorded with a verifiable reference code.',
+            ? srT('Your candidate profile has been recorded with a verifiable HR reference code.', 'ඔබේ අපේක්ෂක පැතිකඩ තහවුරු කළ හැකි මානව සම්පත් යොමු අංකයක් සමඟ සටහන් කර ඇත.')
+            : srT('Your corporate inquiry has been recorded with a verifiable reference code.', 'ඔබේ ආයතනික විමසුම තහවුරු කළ හැකි යොමු අංකයක් සමඟ සටහන් කර ඇත.'),
           status: statusText,
           created_at: colombo.timestampSlst,
         },
@@ -943,7 +1124,13 @@
 
       // Drives the conic-gradient ring around the button face.
       scrollTopBtn.style.setProperty('--scroll-progress', ratio.toFixed(4));
-      scrollTopBtn.setAttribute('aria-label', `Scroll back to the top of the page (${Math.round(ratio * 100)}% read)`);
+      scrollTopBtn.setAttribute(
+        'aria-label',
+        srT(
+          `Scroll back to the top of the page (${Math.round(ratio * 100)}% read)`,
+          `පිටුවේ මුලට ආපසු යන්න (${Math.round(ratio * 100)}% කියවා ඇත)`
+        )
+      );
     };
 
     const onScroll = () => {

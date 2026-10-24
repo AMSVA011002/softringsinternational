@@ -3548,3 +3548,150 @@ p {
     display: none !important;
   }
 }
+
+/* --------------------------------------------------------------------------
+   19. Sinhala localisation
+   Sinhala has taller ascenders and wider glyphs than Latin, so headings and
+   uppercase micro-labels need their own typeface, line-height and tracking.
+   -------------------------------------------------------------------------- */
+
+html.i18n-boot body {
+  visibility: hidden;
+}
+
+/* Form controls do not inherit the page typeface by default (the UA sheet
+   gives buttons/inputs Arial), which also loses Sinhala glyphs. */
+button,
+input,
+select,
+textarea {
+  font-family: inherit;
+}
+
+/* Re-point the type tokens at Sinhala faces. Every component already reads
+   --font-sans / --font-serif / --font-mono, so this reaches the mono eyebrow
+   and stat labels that would otherwise fall back to Latin-only glyphs. */
+html[lang='si'],
+html[data-lang='si'] {
+  --font-sans: 'Noto Sans Sinhala', 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-serif: 'Noto Serif Sinhala', 'Lora', Georgia, serif;
+  --font-mono: 'Noto Sans Sinhala', 'JetBrains Mono', ui-monospace, monospace;
+  --atr-serif: 'Noto Serif Sinhala', 'Lora', Georgia, 'Times New Roman', serif;
+}
+
+html[lang='si'] body,
+html[data-lang='si'] body {
+  font-size: 1.02rem;
+  line-height: 1.78;
+}
+
+html[lang='si'] h1,
+html[lang='si'] h2,
+html[lang='si'] h3,
+html[lang='si'] h4,
+html[lang='si'] h5,
+html[data-lang='si'] h1,
+html[data-lang='si'] h2,
+html[data-lang='si'] h3,
+html[data-lang='si'] h4,
+html[data-lang='si'] h5 {
+  font-family: 'Noto Serif Sinhala', var(--font-serif), serif;
+  line-height: 1.5;
+  letter-spacing: 0;
+}
+
+html[lang='si'] .atr-hero__title,
+html[data-lang='si'] .atr-hero__title {
+  line-height: 1.35;
+}
+
+/* Uppercase + wide tracking is a Latin display convention; Sinhala reads
+   better with normal tracking and no case transform. */
+html[lang='si'] .eyebrow,
+html[lang='si'] .atr-eyebrow,
+html[lang='si'] .utility-bar,
+html[lang='si'] .atr-statbar__label,
+html[lang='si'] .footer-heading,
+html[lang='si'] .section-label,
+html[lang='si'] .brand__subtitle,
+html[lang='si'] .identity-ribbon__badge,
+html[data-lang='si'] .eyebrow,
+html[data-lang='si'] .atr-eyebrow,
+html[data-lang='si'] .utility-bar,
+html[data-lang='si'] .atr-statbar__label,
+html[data-lang='si'] .footer-heading,
+html[data-lang='si'] .section-label,
+html[data-lang='si'] .brand__subtitle,
+html[data-lang='si'] .identity-ribbon__badge {
+  letter-spacing: 0.02em;
+  text-transform: none;
+}
+
+/* Latin brand names inside headings keep their real casing (mPOS, SLT-Mobitel). */
+html[lang='si'] h1,
+html[lang='si'] h2,
+html[lang='si'] h3,
+html[lang='si'] h4,
+html[lang='si'] .atr-hero__title,
+html[lang='si'] .atr-heading,
+html[lang='si'] .page-hero__title,
+html[data-lang='si'] h1,
+html[data-lang='si'] h2,
+html[data-lang='si'] h3,
+html[data-lang='si'] h4,
+html[data-lang='si'] .atr-hero__title,
+html[data-lang='si'] .atr-heading,
+html[data-lang='si'] .page-hero__title {
+  text-transform: none;
+}
+
+html[lang='si'] .brand__title,
+html[data-lang='si'] .brand__title {
+  font-family: 'Noto Sans Sinhala', var(--font-sans), sans-serif;
+  font-size: 0.92rem;
+}
+
+html[lang='si'] .btn,
+html[lang='si'] .atr-btn,
+html[data-lang='si'] .btn,
+html[data-lang='si'] .atr-btn {
+  letter-spacing: 0;
+  font-family: 'Noto Sans Sinhala', var(--font-sans), sans-serif;
+}
+
+/* Sinhala sits slightly low in its em box — nudge icon buttons back to centre. */
+html[lang='si'] .lang-btn,
+html[data-lang='si'] .lang-btn {
+  font-family: 'Noto Sans Sinhala', 'Plus Jakarta Sans', sans-serif;
+}
+
+html[lang='si'] .scroll-top__label,
+html[data-lang='si'] .scroll-top__label {
+  letter-spacing: 0.02em;
+  font-size: 0.56rem;
+  font-family: 'Noto Sans Sinhala', var(--font-mono), sans-serif;
+}
+
+/* Long Sinhala compounds need a little more room in dense cards. */
+html[lang='si'] .atr-card,
+html[lang='si'] .atr-post,
+html[lang='si'] .atr-plan,
+html[lang='si'] .branch-card,
+html[data-lang='si'] .atr-card,
+html[data-lang='si'] .atr-post,
+html[data-lang='si'] .atr-plan,
+html[data-lang='si'] .branch-card {
+  line-height: 1.8;
+}
+
+@media (max-width: 760px) {
+  html[lang='si'] body,
+  html[data-lang='si'] body {
+    font-size: 0.98rem;
+  }
+
+  html[lang='si'] .atr-hero__title,
+  html[data-lang='si'] .atr-hero__title {
+    line-height: 1.4;
+  }
+}

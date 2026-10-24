@@ -20,7 +20,7 @@ foreach ($branchesAll as $b) {
         'sun' => $b['hours_sun'],
     ];
 }
-$trilingual = get_trilingual_motto();
+$siteLanguages = get_site_languages();
 $colomboNowIso = date('c');
 $colomboTimeFormatted = date('h:i A');
 ?>
@@ -33,9 +33,23 @@ $colomboTimeFormatted = date('h:i A');
   <meta name="description" content="<?= e($pageDescription) ?>">
   <meta name="theme-color" content="#002E87">
   <link rel="icon" type="image/svg+xml" href="assets/images/favicon.svg">
+  <script>
+    /* Applied before the first paint so a returning Sinhala visitor never sees
+       a flash of English. Failsafe: the class is dropped after 1.5s either way. */
+    (function () {
+      try {
+        if (localStorage.getItem('softrings_lang') === 'si') {
+          document.documentElement.setAttribute('data-lang', 'si');
+          document.documentElement.lang = 'si';
+          document.documentElement.classList.add('i18n-boot');
+          setTimeout(function () { document.documentElement.classList.remove('i18n-boot'); }, 1500);
+        }
+      } catch (e) {}
+    })();
+  </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Lora:ital,wght@0,400;0,500;1,400;1,500&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Lora:ital,wght@0,400;0,500;1,400;1,500&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Noto+Sans+Sinhala:wght@400;500;600;700&family=Noto+Serif+Sinhala:wght@500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="assets/css/style.css">
   <link rel="stylesheet" href="assets/css/atrium.css">
   <script type="application/ld+json">
@@ -78,7 +92,7 @@ $colomboTimeFormatted = date('h:i A');
 <body>
   <a href="#main-content" class="skip-link">Skip to main content</a>
 
-  <!-- Top Corporate Telemetry & Trilingual Bar -->
+  <!-- Top Corporate Telemetry & Language Bar -->
   <div class="utility-bar" role="region" aria-label="Corporate status and language">
     <div class="container utility-bar__inner">
       <div class="utility-bar__left">
@@ -97,16 +111,15 @@ $colomboTimeFormatted = date('h:i A');
       </div>
 
       <div class="utility-bar__right">
-        <div class="lang-switcher" role="group" aria-label="Corporate motto language">
-          <?php foreach ($trilingual as $code => $langData): ?>
+        <div class="lang-switcher" role="group" aria-label="Language / භාෂාව">
+          <?php foreach ($siteLanguages as $code => $langData): ?>
             <button
               type="button"
               class="lang-btn <?= $code === 'en' ? 'is-active' : '' ?>"
               data-lang-switch="<?= e($code) ?>"
-              data-motto="<?= e($langData['motto']) ?>"
-              data-corp-name="<?= e($langData['name']) ?>"
-              data-badge="<?= e($langData['badge']) ?>"
+              lang="<?= e($code) ?>"
               aria-pressed="<?= $code === 'en' ? 'true' : 'false' ?>"
+              title="<?= $code === 'si' ? 'සිංහලට මාරු වන්න' : 'Switch to English' ?>"
             ><?= e($langData['label']) ?></button>
           <?php endforeach; ?>
         </div>
@@ -120,11 +133,11 @@ $colomboTimeFormatted = date('h:i A');
     </div>
   </div>
 
-  <!-- Trilingual Dynamic Identity Ribbon -->
+  <!-- Dynamic Identity Ribbon -->
   <div class="identity-ribbon">
     <div class="container identity-ribbon__inner">
-      <span class="identity-ribbon__badge" id="ribbon-badge"><?= e($trilingual['en']['badge']) ?></span>
-      <p class="identity-ribbon__text" id="ribbon-motto"><?= e($trilingual['en']['motto']) ?></p>
+      <span class="identity-ribbon__badge" id="ribbon-badge"><?= e($siteLanguages['en']['badge']) ?></span>
+      <p class="identity-ribbon__text" id="ribbon-motto"><?= e($siteLanguages['en']['motto']) ?></p>
     </div>
   </div>
 

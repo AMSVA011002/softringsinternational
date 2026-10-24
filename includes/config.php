@@ -26,28 +26,24 @@ const COMPANY_HOTLINE_RAW = '+94717000090';
 const COMPANY_KANDY_HOTLINE = '+94 81 222 7417';
 
 /**
- * Trilingual Corporate Identity Banner (English / Sinhala / Tamil)
+ * Site languages: English and Sinhala only. The switcher in the utility bar
+ * renders one button per entry, and main.js translates the whole page.
  */
-function get_trilingual_motto(): array
+function get_site_languages(): array
 {
+    // The site now ships two languages: English and Sinhala.
     return [
         'en' => [
-            'label' => 'EN',
+            'label' => 'English',
             'name' => 'Softrings International (Pvt) Ltd',
             'motto' => 'Sri Lanka’s Trusted Partner in Telecommunications, Mobile Retail & Island-Wide Distribution Since 2000',
             'badge' => 'Authorized SLT-Mobitel Dealer Network',
         ],
         'si' => [
-            'label' => 'සිං',
-            'name' => 'සොෆ්ට්රින්ග්ස් ඉන්ටර්නැෂනල් (පුද්) සමාගම',
-            'motto' => 'වසර 2000 සිට ශ්‍රී ලංකාව පුරා විශ්වාසනීය ජංගම දුරකථන සහ විදුලි සංදේශ බෙදාහැරීමේ ප්‍රමුඛයා',
+            'label' => 'සිංහල',
+            'name' => 'සොෆ්ට්‍රින්ග්ස් ඉන්ටර්නැෂනල් (පුද්) සමාගම',
+            'motto' => 'වසර 2000 සිට ශ්‍රී ලංකාව පුරා විශ්වාසනීය විදුලි සංදේශ, ජංගම දුරකථන අලෙවි සහ බෙදාහැරීමේ ප්‍රමුඛ පාර්ශ්වකරු',
             'badge' => 'SLT-Mobitel බලයලත් අලෙවි ජාලය',
-        ],
-        'ta' => [
-            'label' => 'தமிழ்',
-            'name' => 'சொஃப்ட்ரிங்ஸ் இன்டர்நேஷனல் (பிரைவேட்) லிமிடெட்',
-            'motto' => '2000 முதல் இலங்கையின் நம்பகமான தொலைத்தொடர்பு மற்றும் கையடக்கத் தொலைபேசி விநியோகப் பங்காளர்',
-            'badge' => 'அங்கீகரிக்கப்பட்ட SLT-Mobitel முகவர் வலையமைப்பு',
         ],
     ];
 }
