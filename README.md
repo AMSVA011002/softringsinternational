@@ -4,6 +4,20 @@
 
 Official corporate profile web application for **Softrings International (Pvt) Ltd** (Member of the **Softrings Group of Companies**, Sri Lanka), built with **PHP 8+**, semantic **HTML5**, bespoke **CSS3**, and zero-dependency **Vanilla JavaScript**.
 
+## Visual Identity (SLT-Mobitel palette)
+The interface palette is taken directly from the official SLT-Mobitel stylesheet (`www.mobitel.lk/sites/all/themes/mobitel/css/style.css`) so the site reads as an authentic Authorized Dealer property:
+
+| Token | Hex | Role |
+| --- | --- | --- |
+| Mobitel Green | `#3AC22A` | Primary accent, CTAs, active states, brand highlights |
+| Mobitel Blue | `#0055AB` | Brand blue, section headings, links, secondary actions |
+| Mobitel Navy | `#002E87` | Top bar, hero gradients, footer, deep headings |
+| Mobitel Blue 700 | `#004387` | Gradient mid-tones and hover states |
+| Mobitel Sky | `#8CD8FF` | Highlights and links on dark surfaces |
+| Body / muted / borders | `#3A3A3A` · `#6A6A6A` · `#CCCCCC` | Copy, captions, form outlines |
+
+UI/UX refinements built on that palette: pill navigation with a green underline indicator, floating fact-ledger card over the hero, glassmorphic meta cards, gradient CTA panel, interactive map with a green-to-blue coastline, branded range sliders, unified focus rings, `prefers-reduced-motion` support, and a responsive nav that collapses at 1040px with a branded dropdown panel.
+
 ## Key Features
 - **Authentic Sri Lankan Corporate Data:** Verified group history (Est. 2000 Group / 11 September 2009 Softrings International), subsidiaries matrix, Board of Directors & executive management, and 8 core showrooms/offices across Western and Central Provinces.
 - **Live Sri Lanka Standard Time (`Asia/Colombo`) Telemetry:** Server-side PHP + client-side JS real-time clock and automatic per-branch Open/Closed status calculation.

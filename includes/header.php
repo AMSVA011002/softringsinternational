@@ -31,11 +31,11 @@ $colomboTimeFormatted = date('h:i A');
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title><?= e($pageTitle) ?></title>
   <meta name="description" content="<?= e($pageDescription) ?>">
-  <meta name="theme-color" content="#0B192C">
+  <meta name="theme-color" content="#002E87">
   <link rel="icon" type="image/svg+xml" href="assets/images/favicon.svg">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="assets/css/style.css">
   <script type="application/ld+json">
   {
@@ -133,11 +133,11 @@ $colomboTimeFormatted = date('h:i A');
       <a href="index.php" class="brand" aria-label="Softrings International (Pvt) Ltd Home">
         <span class="brand__emblem" aria-hidden="true">
           <svg viewBox="0 0 48 48" width="42" height="42" fill="none">
-            <rect width="48" height="48" rx="11" fill="#0B192C"/>
-            <circle cx="24" cy="24" r="16" stroke="#0057B8" stroke-width="2.6" stroke-dasharray="72 28" stroke-linecap="round"/>
-            <circle cx="24" cy="24" r="10.5" stroke="#00A651" stroke-width="2.2" stroke-dasharray="46 20" stroke-dashoffset="-14" stroke-linecap="round"/>
+            <rect width="48" height="48" rx="11" fill="#002E87"/>
+            <circle cx="24" cy="24" r="16" stroke="#8CD8FF" stroke-width="2.6" stroke-dasharray="72 28" stroke-linecap="round"/>
+            <circle cx="24" cy="24" r="10.5" stroke="#3AC22A" stroke-width="2.2" stroke-dasharray="46 20" stroke-dashoffset="-14" stroke-linecap="round"/>
             <path d="M27.4 18.2C26.4 17.3 25.0 16.9 23.4 16.9C20.9 16.9 19.3 18.2 19.3 20.0C19.3 21.9 21.1 22.6 23.7 23.3C26.8 24.1 29.1 25.2 29.1 28.0C29.1 30.8 26.6 32.5 23.3 32.5C20.8 32.5 18.9 31.6 17.8 30.2" stroke="#FFFFFF" stroke-width="2.7" stroke-linecap="round"/>
-            <circle cx="35" cy="13" r="2.6" fill="#C59B27"/>
+            <circle cx="35" cy="13" r="2.6" fill="#3AC22A"/>
           </svg>
         </span>
         <span class="brand__text">

@@ -83,26 +83,36 @@ require_once __DIR__ . '/includes/header.php';
         <div class="srilanka-svg-wrap">
           <svg viewBox="0 0 360 520" class="srilanka-svg" role="img" aria-label="Map of Sri Lanka highlighting Softrings International branches in Western and Central Provinces">
             <defs>
-              <linearGradient id="slLandGrad" x1="0" y1="0" x2="1" y2="1">
-                <stop offset="0%" stop-color="#EEF3F9"/>
-                <stop offset="100%" stop-color="#DCE6F2"/>
+              <linearGradient id="slLandGrad" x1="0.1" y1="0" x2="0.9" y2="1">
+                <stop offset="0%" stop-color="#E8F7E4"/>
+                <stop offset="48%" stop-color="#E4F1FC"/>
+                <stop offset="100%" stop-color="#CFE4F7"/>
               </linearGradient>
+              <linearGradient id="slCoastGrad" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stop-color="#3AC22A"/>
+                <stop offset="100%" stop-color="#0055AB"/>
+              </linearGradient>
+              <filter id="slLandShadow" x="-20%" y="-20%" width="140%" height="140%">
+                <feDropShadow dx="0" dy="6" stdDeviation="7" flood-color="#00306F" flood-opacity="0.18"/>
+              </filter>
             </defs>
             <!-- Stylized Accurate Sri Lanka Island Silhouette -->
             <path
               d="M150,28 C164,34 176,52 184,72 C195,98 214,126 232,162 C252,202 274,248 282,296 C289,338 284,386 262,424 C240,462 202,486 164,488 C132,489 106,470 96,440 C86,410 92,374 90,338 C88,298 78,258 84,218 C90,178 106,144 114,108 C120,80 124,48 136,32 C140,27 145,26 150,28 Z"
               fill="url(#slLandGrad)"
-              stroke="#94A8C4"
-              stroke-width="2"
+              stroke="url(#slCoastGrad)"
+              stroke-width="2.4"
+              stroke-opacity="0.55"
+              filter="url(#slLandShadow)"
             />
             <!-- Western & Central Corridor Connection Line -->
             <polyline
               points="102,380 112,364 105,355 126,366 146,344 182,306 191,286"
               fill="none"
-              stroke="#0057B8"
+              stroke="#0055AB"
               stroke-width="2"
               stroke-dasharray="4 4"
-              opacity="0.65"
+              opacity="0.55"
             />
             <!-- Regional Labels -->
             <text x="198" y="274" class="map-region-label">Kandy</text>
