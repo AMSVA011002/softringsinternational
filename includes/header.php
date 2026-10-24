@@ -6,6 +6,20 @@ $pageTitle = isset($pageTitle) ? $pageTitle . ' | ' . COMPANY_NAME : COMPANY_NAM
 $pageDescription = $pageDescription ?? 'Official corporate profile of Softrings International (Pvt) Ltd, part of the Softrings Group of Companies (Est. 2000) in Sri Lanka — Authorized SLT-Mobitel Dealer, multi-brand smartphone distributor, and Softrings mPOS terminal provider across Colombo, Maharagama, Homagama, Kandy, and Gampola.';
 $activeNav = $activeNav ?? 'home';
 
+// One canonical address per page, so /index.html and / variants never compete.
+$canonicalRoutes = [
+    'home' => '',
+    'about' => 'about.html',
+    'services' => 'services.html',
+    'branches' => 'branches.html',
+    'careers' => 'careers.html',
+    'contact' => 'contact.html',
+];
+$canonicalUrl = array_key_exists($activeNav, $canonicalRoutes)
+    ? SITE_URL . '/' . $canonicalRoutes[$activeNav]
+    : '';
+$shareImage = SITE_URL . '/assets/images/hero-corporate.jpg';
+
 $branchesAll = get_branches();
 $openCount = 0;
 $scheduleCompact = [];
@@ -31,6 +45,18 @@ $colomboTimeFormatted = date('h:i A');
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title><?= e($pageTitle) ?></title>
   <meta name="description" content="<?= e($pageDescription) ?>">
+<?php if ($canonicalUrl !== ''): ?>
+  <link rel="canonical" href="<?= e($canonicalUrl) ?>">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="<?= e(COMPANY_NAME) ?>">
+  <meta property="og:title" content="<?= e($pageTitle) ?>">
+  <meta property="og:description" content="<?= e($pageDescription) ?>">
+  <meta property="og:url" content="<?= e($canonicalUrl) ?>">
+  <meta property="og:image" content="<?= e($shareImage) ?>">
+  <meta name="twitter:card" content="summary_large_image">
+<?php else: ?>
+  <meta name="robots" content="noindex, follow">
+<?php endif; ?>
   <meta name="theme-color" content="#002E87">
   <link rel="icon" type="image/svg+xml" href="assets/images/favicon.svg">
   <script>
@@ -60,7 +86,8 @@ $colomboTimeFormatted = date('h:i A');
     "alternateName": "Softrings Group of Companies",
     "foundingDate": "2009-09-11",
     "slogan": "Your Partner in Technology",
-    "url": "https://www.softrings.lk",
+    "url": "<?= e(SITE_URL) ?>/",
+    "sameAs": ["https://www.softrings.lk"],
     "telephone": "+94-71-700-0090",
     "email": "international@softrings.lk",
     "address": [

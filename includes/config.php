@@ -26,6 +26,23 @@ const COMPANY_HOTLINE_RAW = '+94717000090';
 const COMPANY_KANDY_HOTLINE = '+94 81 222 7417';
 
 /**
+ * Public address of the published site. Every page emits this as its canonical
+ * URL, and the structured-data block uses it as the organisation's website, so
+ * search engines index one address instead of the /index.html variants.
+ * Override with the SITE_BASE_URL environment variable on another host.
+ */
+if (!defined('SITE_URL')) {
+    $__siteBase = rtrim((string) (getenv('SITE_BASE_URL') ?: ''), '/');
+    if ($__siteBase === '') {
+        $__repoSlug = (string) (getenv('GITHUB_REPOSITORY') ?: 'AMSVA011002/softringsinternational');
+        [$__repoOwner, $__repoName] = array_pad(explode('/', $__repoSlug, 2), 2, 'softringsinternational');
+        $__siteBase = 'https://' . strtolower($__repoOwner) . '.github.io/' . $__repoName;
+    }
+    define('SITE_URL', $__siteBase);
+    unset($__siteBase, $__repoSlug, $__repoOwner, $__repoName);
+}
+
+/**
  * Site languages: English and Sinhala only. The switcher in the utility bar
  * renders one button per entry, and main.js translates the whole page.
  */
