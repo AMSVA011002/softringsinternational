@@ -4,6 +4,27 @@ $groupEntities = get_group_entities();
 ?>
   </main>
 
+  <!-- Floating Scroll-to-Top Control -->
+  <button
+    type="button"
+    class="scroll-top"
+    id="scroll-top"
+    aria-label="Scroll back to the top of the page"
+    title="Back to top"
+    hidden
+  >
+    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"
+         stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+      <path d="M12 19V5"/>
+      <path d="M5.5 11.5 12 5l6.5 6.5"/>
+    </svg>
+    <span class="scroll-top__label">Top</span>
+    <svg class="scroll-top__ring" viewBox="0 0 44 44" aria-hidden="true" focusable="false">
+      <circle class="scroll-top__ring-track" cx="22" cy="22" r="20"/>
+      <circle class="scroll-top__ring-progress" cx="22" cy="22" r="20" data-scroll-progress/>
+    </svg>
+  </button>
+
   <!-- Reference Status Lookup Modal -->
   <div class="modal-backdrop" id="tracker-modal" hidden aria-hidden="true">
     <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="tracker-modal-title">

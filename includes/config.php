@@ -178,25 +178,25 @@ function get_leadership(): array
     return [
         'board' => [
             [
-                'name' => 'Mr. P. Amal Nishantha Silva',
+                'name' => 'Mr. P. Amal Nishantha Silva', 'photo' => 'assets/images/team/amal-nishantha-silva.jpg',
                 'role' => 'Chairman',
                 'email' => 'amal@softrings.lk',
                 'bio' => 'Provides overarching strategic governance and commercial vision across Softrings International (Pvt) Ltd and the Softrings Group of Companies, guiding over two decades of SLT-Mobitel dealership growth and island-wide device distribution.',
             ],
             [
-                'name' => 'Mrs. C. Anne Olivia Bernadeth Silva',
+                'name' => 'Mrs. C. Anne Olivia Bernadeth Silva', 'photo' => 'assets/images/team/anne-olivia-bernadeth-silva.jpg',
                 'role' => 'Director',
                 'email' => 'oliviasilva@softrings.lk',
                 'bio' => 'Serves on the Board of Directors overseeing corporate administration, financial stewardship, and multi-branch operational compliance across Western and Central Provinces.',
             ],
         ],
         'management' => [
-            ['role' => 'General Manager', 'name' => 'Mr. Kshemendra Karunaratne', 'dept' => 'Executive Operations', 'email' => 'kshemendra@softrings.lk'],
-            ['role' => 'Human Resources Manager', 'name' => 'Mr. S. P. Somasiri Perera', 'dept' => 'People & Administration', 'email' => 'perera@softrings.lk'],
-            ['role' => 'Sales Manager', 'name' => 'Mr. Wasana Rajapaksha', 'dept' => 'Island-Wide Distribution', 'email' => 'wasana@softrings.lk'],
-            ['role' => 'Chief Accountant', 'name' => 'Mr. Upul Deshapriya', 'dept' => 'Finance & Audit', 'email' => 'upul@softrings.lk'],
-            ['role' => 'Company Secretary', 'name' => 'Ms. Pradeepa Dilrukshi', 'dept' => 'Corporate Governance', 'email' => 'pradeepa@softrings.lk'],
-            ['role' => 'Technical Manager', 'name' => 'Mr. Neranjan Santha Kumara', 'dept' => 'Hardware & Warranty Lab', 'email' => 'kumara@softrings.lk'],
+            ['role' => 'General Manager', 'name' => 'Mr. Kshemendra Karunaratne', 'photo' => 'assets/images/team/kshemendra-karunaratne.jpg', 'dept' => 'Executive Operations', 'email' => 'kshemendra@softrings.lk'],
+            ['role' => 'Human Resources Manager', 'name' => 'Mr. S. P. Somasiri Perera', 'photo' => 'assets/images/team/somasiri-perera.jpg', 'dept' => 'People & Administration', 'email' => 'perera@softrings.lk'],
+            ['role' => 'Sales Manager', 'name' => 'Mr. Wasana Rajapaksha', 'photo' => 'assets/images/team/wasana-rajapaksha.jpg', 'dept' => 'Island-Wide Distribution', 'email' => 'wasana@softrings.lk'],
+            ['role' => 'Chief Accountant', 'name' => 'Mr. Upul Deshapriya', 'photo' => 'assets/images/team/upul-deshapriya.jpg', 'dept' => 'Finance & Audit', 'email' => 'upul@softrings.lk'],
+            ['role' => 'Company Secretary', 'name' => 'Ms. Pradeepa Dilrukshi', 'photo' => 'assets/images/team/pradeepa-dilrukshi.jpg', 'dept' => 'Corporate Governance', 'email' => 'pradeepa@softrings.lk'],
+            ['role' => 'Technical Manager', 'name' => 'Mr. Neranjan Santha Kumara', 'photo' => 'assets/images/team/neranjan-santha-kumara.jpg', 'dept' => 'Hardware & Warranty Lab', 'email' => 'kumara@softrings.lk'],
         ],
     ];
 }
@@ -265,7 +265,8 @@ function get_services_catalog(): array
 
 /**
  * Verified Branch & Corporate Office Network across Sri Lanka
- * map_x / map_y correspond to coordinates on our custom Sri Lanka SVG map (viewBox 0 0 360 520)
+ * lat / lng are real geographic coordinates and are projected onto the district
+ * map (viewBox 0 0 450 793) by sri_lanka_map_point().
  */
 function get_branches(): array
 {
@@ -286,8 +287,8 @@ function get_branches(): array
             'hours_sun' => null,
             'hours_label' => 'Mon–Fri 8:00 AM – 6:00 PM · Sat 8:30 AM – 2:00 PM',
             'coords' => '6.8448° N, 79.9285° E',
-            'map_x' => 112,
-            'map_y' => 364,
+            'lat' => 6.8448,
+            'lng' => 79.9285,
             'services' => ['Corporate Administration', 'Wholesale Inquiries', 'Device Retail', 'Fleet Dispatch'],
         ],
         [
@@ -306,8 +307,8 @@ function get_branches(): array
             'hours_sun' => null,
             'hours_label' => 'Mon–Fri 8:30 AM – 6:00 PM · Sat 9:00 AM – 2:00 PM',
             'coords' => '7.1644° N, 80.5766° E',
-            'map_x' => 182,
-            'map_y' => 306,
+            'lat' => 7.1644,
+            'lng' => 80.5766,
             'services' => ['Central Region Ops', 'SLT-Mobitel Dealer Point', 'Handset Distribution', 'mPOS Support'],
         ],
         [
@@ -326,8 +327,8 @@ function get_branches(): array
             'hours_sun' => ['08:30', '19:00'],
             'hours_label' => 'Daily 8:30 AM – 7:00 PM (Extended Customer Care)',
             'coords' => '6.8410° N, 79.9999° E',
-            'map_x' => 126,
-            'map_y' => 366,
+            'lat' => 6.841,
+            'lng' => 79.9999,
             'services' => ['SLT-Mobitel Bill Pay', 'SIM & Broadband', 'Original Phones & Warranty', 'HR & Admin'],
         ],
         [
@@ -346,8 +347,8 @@ function get_branches(): array
             'hours_sun' => null,
             'hours_label' => 'Mon–Fri 8:30 AM – 6:00 PM · Sat 9:00 AM – 2:00 PM',
             'coords' => '6.8480° N, 79.9267° E',
-            'map_x' => 115,
-            'map_y' => 358,
+            'lat' => 6.848,
+            'lng' => 79.9267,
             'services' => ['Mobitel Authorized Point', 'mCash & Bill Pay', 'Smartphones & Modems', 'Accounts'],
         ],
         [
@@ -366,8 +367,8 @@ function get_branches(): array
             'hours_sun' => null,
             'hours_label' => 'Mon–Fri 8:30 AM – 6:00 PM · Sat 9:00 AM – 2:00 PM',
             'coords' => '7.2955° N, 80.6378° E',
-            'map_x' => 191,
-            'map_y' => 286,
+            'lat' => 7.2955,
+            'lng' => 80.6378,
             'services' => ['Hill Country Distribution', 'SLT-Mobitel Services', 'mCash Hub', 'Retail Showroom'],
         ],
         [
@@ -386,8 +387,8 @@ function get_branches(): array
             'hours_sun' => null,
             'hours_label' => 'Mon–Fri 8:30 AM – 6:00 PM · Sat 9:00 AM – 2:00 PM',
             'coords' => '6.9543° N, 80.2046° E',
-            'map_x' => 146,
-            'map_y' => 344,
+            'lat' => 6.9543,
+            'lng' => 80.2046,
             'services' => ['Seethawaka Distribution', 'Mobitel Connections', 'Mobile Phones & Accessories'],
         ],
         [
@@ -406,8 +407,8 @@ function get_branches(): array
             'hours_sun' => null,
             'hours_label' => 'Mon–Fri 8:30 AM – 6:00 PM · Sat 9:00 AM – 2:00 PM',
             'coords' => '6.7730° N, 79.8816° E',
-            'map_x' => 102,
-            'map_y' => 380,
+            'lat' => 6.773,
+            'lng' => 79.8816,
             'services' => ['Coastal Corridor Retail', 'SLT-Mobitel Bill Pay', 'Device Warranty Support'],
         ],
         [
@@ -426,8 +427,8 @@ function get_branches(): array
             'hours_sun' => null,
             'hours_label' => 'Mon–Fri 8:30 AM – 5:30 PM · Sat 9:00 AM – 1:30 PM',
             'coords' => '6.8729° N, 79.8886° E',
-            'map_x' => 105,
-            'map_y' => 355,
+            'lat' => 6.8729,
+            'lng' => 79.8886,
             'services' => ['National Handset Wholesale', 'Hardware Repair Lab', 'Group Operations'],
         ],
     ];
@@ -447,6 +448,44 @@ function get_extended_touchpoints(): array
         ['city' => 'Kegalle', 'address' => 'No. 99/1, Main Street, Kegalle', 'phone' => '+94 35 222 2755'],
         ['city' => 'Nuwara Eliya', 'address' => 'No. 4/1, Kandy Road, Nuwara Eliya', 'phone' => '+94 52 222 3110'],
     ];
+}
+
+/**
+ * Project a real Sri Lanka latitude/longitude onto the district map viewBox.
+ *
+ * The supplied district map (includes/sri-lanka-districts.php) is drawn in a
+ * 0 0 450 793 viewBox whose north-west corner corresponds to 9.8125 N /
+ * 79.7066 E and whose south-east corner corresponds to 5.9499 N / 81.8774 E
+ * (the exact geographic extent of the source boundary data). The projection is
+ * therefore a plain latitude/longitude to pixel mapping, so pins land in the
+ * correct district.
+ *
+ * @return array{x: float, y: float}
+ */
+function sri_lanka_map_point(float $lat, float $lng): array
+{
+    $bounds = [
+        'x0' => 0.257125,
+        'y0' => 0.260747,
+        'x1' => 449.417120,
+        'y1' => 792.260750,
+        'lng0' => 79.706597,
+        'lng1' => 81.877419,
+        'lat0' => 5.949911,
+        'lat1' => 9.812519,
+    ];
+
+    $x = $bounds['x0'] + (($lng - $bounds['lng0']) / ($bounds['lng1'] - $bounds['lng0'])) * ($bounds['x1'] - $bounds['x0']);
+    $y = $bounds['y0'] + (($bounds['lat1'] - $lat) / ($bounds['lat1'] - $bounds['lat0'])) * ($bounds['y1'] - $bounds['y0']);
+
+    // Calibration nudge: the district source is a generalised tracing, so the raw
+    // projection is a few map units west of the drawn coastline. This offset was
+    // measured by testing every branch coordinate against its own district
+    // polygon (isPointInFill) and keeps all eight inside the correct boundary.
+    $x += 11.0;
+    $y -= 2.0;
+
+    return ['x' => round($x, 2), 'y' => round($y, 2)];
 }
 
 /**

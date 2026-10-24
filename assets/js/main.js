@@ -845,6 +845,7 @@
     const roleEl = memberModal.querySelector('[data-member-role]');
     const bioEl = memberModal.querySelector('[data-member-bio]');
     const mailEl = memberModal.querySelector('[data-member-mail]');
+    const photoEl = memberModal.querySelector('[data-member-photo]');
     let memberFocus = null;
 
     const closeMember = () => {
@@ -864,6 +865,17 @@
         if (roleEl) roleEl.textContent = card.getAttribute('data-role') || '';
         if (bioEl) bioEl.textContent = bio ? bio.textContent : '';
         if (mailEl) mailEl.href = 'mailto:' + email;
+        if (photoEl) {
+          const photo = card.getAttribute('data-photo') || '';
+          if (photo) {
+            photoEl.src = photo;
+            photoEl.alt = 'Placeholder portrait for ' + (card.getAttribute('data-name') || 'director');
+            photoEl.hidden = false;
+          } else {
+            photoEl.hidden = true;
+            photoEl.removeAttribute('src');
+          }
+        }
         memberFocus = card;
         memberModal.hidden = false;
         window.requestAnimationFrame(() => memberModal.classList.add('is-open'));
@@ -902,5 +914,55 @@
       }
     });
   });
+
+
+  /* 8. Floating Scroll-to-Top Control with Reading Progress */
+  const scrollTopBtn = document.getElementById('scroll-top');
+  if (scrollTopBtn) {
+    const progressRing = scrollTopBtn.querySelector('[data-scroll-progress]');
+    const RING_LENGTH = 125.66; // 2πr for r = 20
+    const SHOW_AFTER = 420;
+    let queued = false;
+
+    const paintScrollTop = () => {
+      queued = false;
+      const scrolled = window.scrollY || window.pageYOffset || 0;
+      const doc = document.documentElement;
+      const max = Math.max(1, doc.scrollHeight - window.innerHeight);
+      const ratio = Math.min(1, Math.max(0, scrolled / max));
+
+      if (scrolled > SHOW_AFTER) {
+        if (scrollTopBtn.hidden) scrollTopBtn.hidden = false;
+        window.requestAnimationFrame(() => scrollTopBtn.classList.add('is-visible'));
+      } else {
+        scrollTopBtn.classList.remove('is-visible');
+        if (!scrollTopBtn.hidden) {
+          window.setTimeout(() => {
+            if (!scrollTopBtn.classList.contains('is-visible')) scrollTopBtn.hidden = true;
+          }, 240);
+        }
+      }
+
+      if (progressRing) {
+        progressRing.style.strokeDashoffset = String(RING_LENGTH * (1 - ratio));
+      }
+    };
+
+    const onScroll = () => {
+      if (queued) return;
+      queued = true;
+      window.requestAnimationFrame(paintScrollTop);
+    };
+
+    scrollTopBtn.addEventListener('click', () => {
+      const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      window.scrollTo({ top: 0, behavior: reduce ? 'auto' : 'smooth' });
+      scrollTopBtn.blur();
+    });
+
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll, { passive: true });
+    paintScrollTop();
+  }
 
 })();

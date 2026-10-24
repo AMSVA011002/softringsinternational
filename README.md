@@ -29,6 +29,22 @@ The page architecture follows the **QuanticaLabs "Atrium"** corporate one-page t
 
 Interactive behaviour lives in `assets/js/main.js`: hero slider (6.5s auto-advance, pause on hover/focus, `inert` slides), gallery filtering, keyboard-accessible lightbox, board-member modal, and a single-open FAQ accordion.
 
+### Branch map
+
+`branches.php` renders a real Sri Lanka **district map** (all 25 districts) instead of a stylised silhouette:
+
+- Geometry: `includes/sri-lanka-districts.php`, derived from [`@svg-maps/sri-lanka`](https://github.com/VictorCazanave/svg-maps) v2.0.0 (CC BY 4.0, based on [MapSVG](https://mapsvg.com/maps/sri-lanka)), drawn in a `0 0 450 793` viewBox.
+- Pins: every branch in `includes/config.php` carries its real `lat`/`lng`, projected onto that viewBox by `sri_lanka_map_point()`. The helper applies a measured calibration offset so all eight coordinates fall inside their own district polygon (verified with `isPointInFill`).
+- Western and Central districts are tinted, districts that hold a branch are highlighted, and pin colour still reflects the live SLST open/closed status.
+
+### Placeholder staff portraits
+
+Board directors and functional managers currently use generated placeholder portraits in `assets/images/team/` (monogram + "photo to follow" on a brand gradient). Each person's `photo` path is stored in `includes/config.php`, so replacing a real photograph only requires overwriting the file or changing that one key.
+
+### Scroll-to-top control
+
+`includes/footer.php` ships a floating back-to-top button that appears after 420px of scrolling, draws a circular reading-progress ring, and smooth-scrolls to the top (respecting `prefers-reduced-motion`). It is keyboard focusable and hidden in print.
+
 ## Key Features
 - **Authentic Sri Lankan Corporate Data:** Verified group history (Est. 2000 Group / 11 September 2009 Softrings International), subsidiaries matrix, Board of Directors & executive management, and 8 core showrooms/offices across Western and Central Provinces.
 - **Live Sri Lanka Standard Time (`Asia/Colombo`) Telemetry:** Server-side PHP + client-side JS real-time clock and automatic per-branch Open/Closed status calculation.
@@ -57,12 +73,14 @@ Interactive behaviour lives in `assets/js/main.js`: hero slider (6.5s auto-advan
 ├── includes/
 │   ├── config.php          # Central corporate data, SLST branch status & CSRF helpers
 │   ├── db.php              # Self-initializing SQLite3 + JSON fallback storage layer
+│   ├── sri-lanka-districts.php  # 25-district map geometry (CC BY 4.0, MapSVG)
 │   ├── header.php          # SEO/JSON-LD head, SLST utility bar & sticky navigation
-│   └── footer.php          # Multi-office corporate footer & reference lookup modal
+│   └── footer.php          # Footer, scroll-to-top control & reference lookup modal
 ├── assets/
-│   ├── css/style.css       # Custom responsive corporate stylesheet + print rules
+│   ├── css/style.css       # Design tokens, forms, map shell + print rules
+│   ├── css/atrium.css      # Atrium layout system, map styling, scroll-to-top
 │   ├── js/main.js          # Vanilla ES6+ client interactivity & progressive AJAX
-│   └── images/             # Custom corporate photography & SVG brand emblem
+│   └── images/             # Corporate photography, brand emblem & team/ placeholders
 └── COMPANY_PROFILE.md      # Complete researched dossier on Softrings International
 ```
 
