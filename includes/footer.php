@@ -41,11 +41,11 @@ $groupEntities = get_group_entities();
           <div class="brand brand--inverse">
             <span class="brand__emblem" aria-hidden="true">
               <svg viewBox="0 0 48 48" width="40" height="40" fill="none">
-                <rect width="48" height="48" rx="11" fill="#132946"/>
-                <circle cx="24" cy="24" r="16" stroke="#3B82F6" stroke-width="2.6" stroke-dasharray="72 28" stroke-linecap="round"/>
-                <circle cx="24" cy="24" r="10.5" stroke="#10B981" stroke-width="2.2" stroke-dasharray="46 20" stroke-dashoffset="-14" stroke-linecap="round"/>
+                <rect width="48" height="48" rx="11" fill="#002E87"/>
+                <circle cx="24" cy="24" r="16" stroke="#8CD8FF" stroke-width="2.6" stroke-dasharray="72 28" stroke-linecap="round"/>
+                <circle cx="24" cy="24" r="10.5" stroke="#3AC22A" stroke-width="2.2" stroke-dasharray="46 20" stroke-dashoffset="-14" stroke-linecap="round"/>
                 <path d="M27.4 18.2C26.4 17.3 25.0 16.9 23.4 16.9C20.9 16.9 19.3 18.2 19.3 20.0C19.3 21.9 21.1 22.6 23.7 23.3C26.8 24.1 29.1 25.2 29.1 28.0C29.1 30.8 26.6 32.5 23.3 32.5C20.8 32.5 18.9 31.6 17.8 30.2" stroke="#FFFFFF" stroke-width="2.7" stroke-linecap="round"/>
-                <circle cx="35" cy="13" r="2.6" fill="#C59B27"/>
+                <circle cx="35" cy="13" r="2.6" fill="#3AC22A"/>
               </svg>
             </span>
             <span class="brand__text">
@@ -96,12 +96,12 @@ $groupEntities = get_group_entities();
             <div class="footer-office">
               <strong>Colombo Corporate Office</strong>
               <span>No. 65/10, Piliyandala Road, Maharagama 10280</span>
-              <a href="tel:+94717000090">+94 71 700 0090</a> · <a href="tel:+94718728635">+94 71 872 8635</a>
+              <span class="footer-phone-line"><a href="tel:+94717000090">+94 71 700 0090</a><span class="footer-dot" aria-hidden="true">·</span><a href="tel:+94718728635">+94 71 872 8635</a></span>
             </div>
             <div class="footer-office">
               <strong>Central Province Corporate Office</strong>
               <span>No. 102, Nuwara Eliya Road, Gampola 20500</span>
-              <a href="tel:+94714041369">+94 71 404 1369</a> · <a href="tel:+94812351212">+94 81 235 1212</a>
+              <span class="footer-phone-line"><a href="tel:+94714041369">+94 71 404 1369</a><span class="footer-dot" aria-hidden="true">·</span><a href="tel:+94812351212">+94 81 235 1212</a></span>
             </div>
             <div class="footer-office">
               <strong>Kandy &amp; Homagama Hubs</strong>
